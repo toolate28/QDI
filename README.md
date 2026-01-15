@@ -11,7 +11,8 @@ spiralsafe/
 ├── packages/
 │   ├── wave-toolkit/    # Wave analysis (curl, divergence, potential)
 │   ├── atom-trail/      # ATOM provenance & gate transitions
-│   └── ax-signatures/   # Ax/DSPy optimization signatures
+│   ├── ax-signatures/   # Ax/DSPy optimization signatures
+│   └── quantum-ethics/  # Ethical quantum computing framework
 ├── scripts/
 │   └── atom-tag.ts      # ATOM auto-tagging
 └── .claude/
@@ -62,6 +63,29 @@ Ax/DSPy signatures for LLM optimization.
 
 ```typescript
 import { coherenceInterpreter, gateTransitionValidator } from '@spiralsafe/ax-signatures';
+```
+
+### @spiralsafe/quantum-ethics
+Ethical quantum computing framework with equitable access, privacy safeguards, and AI integration.
+
+```typescript
+import { QuantumEthicsFramework, createQuantumCircuit } from '@spiralsafe/quantum-ethics';
+
+const framework = new QuantumEthicsFramework();
+
+// Request resources with 70% coherence baseline
+const { allocation } = framework.requestResources(
+  'user-123',
+  { qubits: 10, gateDepth: 50, estimatedTimeMs: 5000, purpose: 'Research quantum ML' },
+  'research'
+);
+
+// Execute quantum circuit with ethical constraints
+const circuit = createQuantumCircuit(5, [
+  { type: 'H', target: 0 },
+  { type: 'CNOT', target: 1, control: 0 }
+]);
+const { results } = framework.executeQuantumCircuit('user-123', circuit, 10);
 ```
 
 ## MCP Tools
