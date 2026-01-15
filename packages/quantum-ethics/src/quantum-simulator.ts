@@ -7,6 +7,11 @@
 
 export type QubitState = [number, number]; // [alpha, beta] where |alpha|^2 + |beta|^2 = 1
 
+/**
+ * CNOT probabilistic threshold for simplified implementation
+ */
+const CNOT_THRESHOLD = 0.5;
+
 export interface QuantumCircuit {
   circuitId: string;
   qubits: number;
@@ -79,6 +84,8 @@ export class QuantumSimulator {
   
   /**
    * Apply Pauli-Y gate
+   * NOTE: Simplified implementation - ignores imaginary factor (i)
+   * For production use, implement proper complex number arithmetic
    */
   pauliY(target: number): void {
     if (target >= this.qubits.length) {
@@ -127,7 +134,8 @@ export class QuantumSimulator {
   
   /**
    * Apply CNOT gate (entanglement)
-   * Simplified: flips target if control is in |1⟩ state
+   * NOTE: Simplified implementation using probabilistic check
+   * For production use, implement proper tensor product and controlled operations
    */
   cnot(control: number, target: number): void {
     if (control >= this.qubits.length || target >= this.qubits.length) {
@@ -137,7 +145,7 @@ export class QuantumSimulator {
     // Simplified CNOT: if control qubit has |1⟩ component, flip target
     const [controlAlpha, controlBeta] = this.qubits[control];
     
-    if (Math.abs(controlBeta) > 0.5) { // Probabilistic check
+    if (Math.abs(controlBeta) > CNOT_THRESHOLD) { // Probabilistic check
       this.pauliX(target);
     }
     

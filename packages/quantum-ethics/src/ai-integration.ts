@@ -56,6 +56,11 @@ export interface QuantumAIHybridAlgorithm {
 export const COHERENCE_BASELINE = 70;
 
 /**
+ * Minimum ethics alignment score (0-1)
+ */
+export const MIN_ETHICS_ALIGNMENT = 0.7;
+
+/**
  * Validate AI-quantum integration against emergent ethics
  */
 export function validateAIQuantumIntegration(
@@ -89,7 +94,7 @@ export function validateAIQuantumIntegration(
   const aligned = 
     waveMetrics.coherence_score >= coherenceBaseline &&
     gateValidation.passed &&
-    ethicsAlignment >= 0.7;
+    ethicsAlignment >= MIN_ETHICS_ALIGNMENT;
   
   const recommendations: string[] = [];
   
