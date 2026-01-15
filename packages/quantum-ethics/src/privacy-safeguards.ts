@@ -149,6 +149,9 @@ export function verifyKAnonymity(
 
 /**
  * Encrypt quantum circuit parameters
+ * WARNING: This is a placeholder implementation using base64 encoding
+ * NOT SECURE FOR PRODUCTION USE - implement proper AES-256-GCM encryption
+ * with a real cryptographic library (e.g., Web Crypto API, libsodium)
  */
 export function encryptQuantumData(
   data: any,
@@ -160,7 +163,7 @@ export function encryptQuantumData(
   
   return {
     encrypted,
-    algorithm: 'AES-256-GCM' // Placeholder
+    algorithm: 'AES-256-GCM' // Placeholder - NOT actually used
   };
 }
 
