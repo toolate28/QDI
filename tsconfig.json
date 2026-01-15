@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "lib": ["ESNext"],
+    "target": "ESNext",
+    "module": "Preserve",
+    "moduleDetection": "force",
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noPropertyAccessFromIndexSignature": false,
+    "baseUrl": ".",
+    "paths": {
+      "@spiralsafe/wave-toolkit": ["packages/wave-toolkit/src/index.ts"],
+      "@spiralsafe/atom-trail": ["packages/atom-trail/src/index.ts"],
+      "@spiralsafe/ax-signatures": ["packages/ax-signatures/src/index.ts"]
+    }
+  },
+  "include": ["apps/**/*", "packages/**/*", "types/**/*"],
+  "exclude": ["node_modules", "dist"]
+}

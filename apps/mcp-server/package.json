@@ -1,0 +1,21 @@
+{
+  "name": "@spiralsafe/mcp-server",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "bin": {
+    "spiralsafe-mcp": "./src/index.ts"
+  },
+  "scripts": {
+    "dev": "bun run --watch src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target node",
+    "start": "bun run src/index.ts",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@spiralsafe/wave-toolkit": "workspace:*",
+    "@spiralsafe/atom-trail": "workspace:*",
+    "@spiralsafe/ax-signatures": "workspace:*",
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  }
+}

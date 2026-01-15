@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="system">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Dashboard</title>
+
+  <!-- Google Fonts: Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Theme CSS -->
+  <link rel="stylesheet" href="/styles/theme.css">
+
+  <!-- Vue 3 from CDN -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+</head>
+<body>
+  <div id="app">
+    <div class="app-container">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-brand">
+          <img src="/logo.svg" alt="Logo" class="header-logo" />
+          <h1>Claude Dashboard</h1>
+        </div>
+        <theme-toggle></theme-toggle>
+      </header>
+
+      <!-- Main Content -->
+      <main>
+        <tab-container
+          v-model:active-tab="currentTab"
+          :tabs="tabs"
+        >
+          <template #logs>
+            <log-viewer
+              :entries="entries"
+              :sessions="sessions"
+              :current-session="currentSession"
+              v-model:selected-session="selectedSession"
+            ></log-viewer>
+          </template>
+
+          <!-- Future tabs would go here -->
+        </tab-container>
+      </main>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <div class="connection-status">
+          <span
+            class="status-dot"
+            :class="{ connected: isConnected }"
+          ></span>
+          <span>{{ connectionText }}</span>
+          <span v-if="lastHeartbeat" class="heartbeat">
+            ({{ formatHeartbeat }})
+          </span>
+        </div>
+        <div class="entry-count">
+          {{ entries.length }} total entries
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    const { createApp, ref, computed, onMounted, onUnmounted, watch } = Vue;
+
+    // ===== Vue App =====
+    const app = createApp({
+      setup() {
+        // === State ===
+        const entries = ref([]);
+        const isConnected = ref(false);
+        const lastHeartbeat = ref(null);
+        const reconnectAttempts = ref(0);
+        const currentTab = ref('logs');
+        const sessions = ref([]);
+        const currentSession = ref(null);
+        const selectedSession = ref(null);
+
+        // === SSE Connection ===
+        let eventSource = null;
+        let reconnectTimeout = null;
+
+        const tabs = [
+          { id: 'logs', label: 'Hook Log' },
+          // Future: { id: 'analytics', label: 'Analytics' },
+        ];
+
+        const connectionText = computed(() => {
+          if (isConnected.value) {
+            return 'Connected';
+          }
+          if (reconnectAttempts.value > 0) {
+            return `Reconnecting (${reconnectAttempts.value})...`;
+          }
+          return 'Disconnected';
+        });
+
+        const formatHeartbeat = computed(() => {
+          if (!lastHeartbeat.value) return '';
+          try {
+            const date = new Date(lastHeartbeat.value);
+            return date.toLocaleTimeString('en-US', {
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+              hour12: false,
+            });
+          } catch {
+            return '';
+          }
+        });
+
+        async function fetchSessions() {
+          try {
+            const res = await fetch('/api/sessions');
+            const data = await res.json();
+            sessions.value = data.sessions;
+            currentSession.value = data.current_session;
+            if (!selectedSession.value && data.current_session) {
+              selectedSession.value = data.current_session;
+            } else if (!selectedSession.value && data.sessions.length > 0) {
+              selectedSession.value = data.sessions[0].session_id;
+            }
+          } catch (err) {
+            console.error('Failed to fetch sessions:', err);
+          }
+        }
+
+        function connect() {
+          // Clean up existing connection
+          if (eventSource) {
+            eventSource.close();
+          }
+
+          const sessionParam = selectedSession.value ? `?session=${selectedSession.value}` : '';
+          const url = `/events${sessionParam}`;
+          eventSource = new EventSource(url);
+
+          eventSource.onopen = () => {
+            console.log('SSE connected');
+            isConnected.value = true;
+            reconnectAttempts.value = 0;
+          };
+
+          eventSource.onerror = (error) => {
+            console.error('SSE error:', error);
+            isConnected.value = false;
+            eventSource.close();
+            scheduleReconnect();
+          };
+
+          // Handle 'entries' event (initial load)
+          eventSource.addEventListener('entries', (event) => {
+            try {
+              const data = JSON.parse(event.data);
+              entries.value = Array.isArray(data) ? data : [];
+              console.log(`Loaded ${entries.value.length} entries`);
+            } catch (err) {
+              console.error('Failed to parse entries:', err);
+            }
+          });
+
+          // Handle 'entry' event (new entry)
+          eventSource.addEventListener('entry', (event) => {
+            try {
+              const entry = JSON.parse(event.data);
+              entries.value.push(entry);
+            } catch (err) {
+              console.error('Failed to parse entry:', err);
+            }
+          });
+
+          // Handle 'heartbeat' event
+          eventSource.addEventListener('heartbeat', (event) => {
+            try {
+              const data = JSON.parse(event.data);
+              lastHeartbeat.value = data.timestamp;
+            } catch (err) {
+              // Ignore heartbeat parse errors
+            }
+          });
+
+          // Handle 'error' event from server
+          eventSource.addEventListener('error', (event) => {
+            try {
+              const data = JSON.parse(event.data);
+              console.error('Server error:', data);
+            } catch {
+              // Ignore
+            }
+          });
+        }
+
+        function scheduleReconnect() {
+          if (reconnectTimeout) {
+            clearTimeout(reconnectTimeout);
+          }
+
+          // Exponential backoff: 1s, 2s, 4s, 8s, max 30s
+          const delay = Math.min(
+            1000 * Math.pow(2, reconnectAttempts.value),
+            30000
+          );
+
+          reconnectAttempts.value++;
+          console.log(`Reconnecting in ${delay}ms (attempt ${reconnectAttempts.value})`);
+
+          reconnectTimeout = setTimeout(() => {
+            connect();
+          }, delay);
+        }
+
+        function disconnect() {
+          if (reconnectTimeout) {
+            clearTimeout(reconnectTimeout);
+            reconnectTimeout = null;
+          }
+          if (eventSource) {
+            eventSource.close();
+            eventSource = null;
+          }
+          isConnected.value = false;
+        }
+
+        // === Watch selectedSession ===
+        watch(selectedSession, (newSession, oldSession) => {
+          if (newSession && newSession !== oldSession) {
+            // Close existing connection
+            if (eventSource) {
+              eventSource.close();
+              eventSource = null;
+            }
+            // Clear entries and reconnect
+            entries.value = [];
+            connect();
+          }
+        });
+
+        // === Lifecycle ===
+        onMounted(() => {
+          fetchSessions();
+          connect();
+        });
+
+        onUnmounted(() => {
+          disconnect();
+        });
+
+        // === Return ===
+        return {
+          entries,
+          isConnected,
+          connectionText,
+          lastHeartbeat,
+          currentTab,
+          tabs,
+          formatHeartbeat,
+          sessions,
+          currentSession,
+          selectedSession,
+          fetchSessions,
+        };
+      },
+    });
+
+    // ===== Component Registration =====
+
+    // ===== EventBadge Component =====
+    app.component('event-badge', {
+      props: {
+        event: {
+          type: String,
+          required: true,
+        },
+      },
+      template: `
+        <span class="event-badge" :class="badgeClass">
+          {{ event }}
+        </span>
+      `,
+      computed: {
+        badgeClass() {
+          return 'badge-' + this.event;
+        },
+      },
+    });
+
+    // ===== ThemeToggle Component =====
+    app.component('theme-toggle', {
+      template: `
+        <button class="theme-toggle" @click="cycle" :title="'Theme: ' + current">
+          <span class="theme-icon">{{ icon }}</span>
+          <span class="theme-label">{{ current }}</span>
+        </button>
+      `,
+      data() {
+        return {
+          current: localStorage.getItem('theme') || 'system',
+        };
+      },
+      computed: {
+        icon() {
+          const icons = { light: '☀️', dark: '🌙', system: '💻' };
+          return icons[this.current] || '💻';
+        },
+      },
+      methods: {
+        cycle() {
+          const modes = ['light', 'dark', 'system'];
+          const idx = modes.indexOf(this.current);
+          this.current = modes[(idx + 1) % modes.length];
+          this.apply();
+        },
+        apply() {
+          localStorage.setItem('theme', this.current);
+          document.documentElement.setAttribute('data-theme', this.current);
+        },
+      },
+      mounted() {
+        this.apply();
+      },
+    });
+
+    // ===== SessionSelector Component =====
+    app.component('session-selector', {
+      props: ['sessions', 'currentSession', 'modelValue'],
+      emits: ['update:modelValue'],
+      template: `
+        <div class="session-selector">
+          <label>Session:</label>
+          <select
+            :value="modelValue"
+            @change="$emit('update:modelValue', $event.target.value)"
+            class="session-select"
+          >
+            <option v-for="s in sessions" :key="s.session_id" :value="s.session_id">
+              {{ s.session_id.slice(0, 8) }}{{ s.session_id === currentSession ? ' (current)' : '' }}
+              - {{ s.entry_count }} entries
+            </option>
+          </select>
+        </div>
+      `
+    });
+
+    // ===== EventFilterDropdown Component =====
+    app.component('event-filter-dropdown', {
+      props: {
+        modelValue: {
+          type: Array,
+          default: () => []
+        },
+        eventTypes: {
+          type: Array,
+          required: true
+        }
+      },
+      data() {
+        return {
+          isOpen: false
+        };
+      },
+      computed: {
+        buttonLabel() {
+          if (this.modelValue.length === 0) {
+            return 'No Events';
+          }
+          if (this.modelValue.length === this.eventTypes.length) {
+            return 'All Events';
+          }
+          if (this.modelValue.length === 1) {
+            return this.modelValue[0];
+          }
+          return `${this.modelValue.length} Events`;
+        }
+      },
+      methods: {
+        toggle() {
+          this.isOpen = !this.isOpen;
+        },
+        close() {
+          this.isOpen = false;
+        },
+        isSelected(event) {
+          return this.modelValue.includes(event);
+        },
+        toggleEvent(event) {
+          const newValue = this.isSelected(event)
+            ? this.modelValue.filter(e => e !== event)
+            : [...this.modelValue, event];
+          this.$emit('update:modelValue', newValue);
+        },
+        selectAll() {
+          this.$emit('update:modelValue', [...this.eventTypes]);
+        },
+        clearAll() {
+          this.$emit('update:modelValue', []);
+        },
+        handleClickOutside(event) {
+          if (this.$el && !this.$el.contains(event.target)) {
+            this.close();
+          }
+        }
+      },
+      mounted() {
+        document.addEventListener('click', this.handleClickOutside);
+      },
+      beforeDestroy() {
+        document.removeEventListener('click', this.handleClickOutside);
+      },
+      template: `
+        <div class="event-dropdown">
+          <button
+            type="button"
+            class="event-dropdown-trigger"
+            @click.stop="toggle"
+          >
+            {{ buttonLabel }}
+            <span class="dropdown-arrow">{{ isOpen ? '▲' : '▼' }}</span>
+          </button>
+          <div v-if="isOpen" class="event-dropdown-panel">
+            <div class="event-dropdown-header">
+              <button type="button" @click="selectAll">Select All</button>
+              <button type="button" @click="clearAll">Clear</button>
+            </div>
+            <div class="event-dropdown-list">
+              <label
+                v-for="event in eventTypes"
+                :key="event"
+                class="event-checkbox"
+              >
+                <input
+                  type="checkbox"
+                  :checked="isSelected(event)"
+                  @change="toggleEvent(event)"
+                />
+                <span class="event-badge" :class="'badge-' + event.toLowerCase()">
+                  {{ event }}
+                </span>
+              </label>
+            </div>
+          </div>
+        </div>
+      `
+    });
+
+    // ===== FilterBar Component =====
+    app.component('filter-bar', {
+      props: {
+        sessions: {
+          type: Array,
+          default: () => [],
+        },
+        currentSession: {
+          type: String,
+          default: null,
+        },
+        selectedSession: {
+          type: String,
+          default: null,
+        },
+        modelValue: {
+          type: Object,
+          default: () => ({
+            search: '',
+            eventTypes: [],
+            sessionId: null,
+          }),
+        },
+      },
+      emits: ['update:modelValue', 'update:selectedSession'],
+      template: `
+        <div class="filter-bar">
+          <div class="filter-row filter-row-main">
+            <input
+              type="text"
+              class="search-input"
+              placeholder="Search logs..."
+              :value="modelValue.search"
+              @input="onSearchInput"
+            />
+
+            <event-filter-dropdown
+              :model-value="modelValue.eventTypes"
+              :event-types="eventTypes"
+              @update:model-value="emit({ eventTypes: $event })"
+            />
+
+            <button class="clear-filters-btn" @click="clearFilters" :disabled="!hasFilters">
+              Clear Filters
+            </button>
+          </div>
+
+          <div class="filter-row filter-row-top">
+            <session-selector
+              :sessions="sessions"
+              :current-session="currentSession"
+              :model-value="selectedSession"
+              @update:model-value="$emit('update:selectedSession', $event)"
+            />
+          </div>
+        </div>
+      `,
+      data() {
+        return {
+          searchTimeout: null,
+          eventTypes: [
+            'UserPromptSubmit',
+            'PreToolUse',
+            'PostToolUse',
+            'PostToolUseFailure',
+            'Notification',
+            'SessionStart',
+            'SessionEnd',
+            'Stop',
+            'SubagentStart',
+            'SubagentStop',
+            'PreCompact',
+            'PermissionRequest',
+          ],
+        };
+      },
+      computed: {
+        hasFilters() {
+          return (
+            this.modelValue.search ||
+            this.modelValue.eventTypes.length > 0
+          );
+        },
+      },
+      methods: {
+        emit(updates) {
+          this.$emit('update:modelValue', {
+            ...this.modelValue,
+            ...updates,
+          });
+        },
+        onSearchInput(e) {
+          // Debounce search
+          clearTimeout(this.searchTimeout);
+          this.searchTimeout = setTimeout(() => {
+            this.emit({ search: e.target.value });
+          }, 300);
+        },
+        clearFilters() {
+          this.emit({
+            search: '',
+            eventTypes: [],
+          });
+          this.$emit('update:selectedSession', 'all');
+        },
+      },
+      beforeUnmount() {
+        clearTimeout(this.searchTimeout);
+      },
+    });
+
+    // ===== LogEntry Component =====
+    app.component('log-entry', {
+      props: {
+        entry: {
+          type: Object,
+          required: true,
+        },
+      },
+      template: `
+        <div class="card log-entry" :class="{ expanded: isExpanded }">
+          <div class="card-header" @click="toggle">
+            <span class="timestamp">{{ formatTime(entry.timestamp) }}</span>
+            <event-badge :event="entry.event"></event-badge>
+            <span class="entry-summary">{{ getSummary(entry) }}</span>
+            <span class="session-id" :title="entry.session_id">
+              {{ truncateId(entry.session_id) }}
+            </span>
+            <span class="expand-icon">{{ isExpanded ? '▼' : '▶' }}</span>
+          </div>
+
+          <div v-if="isExpanded" class="card-content">
+            <div class="json-header">
+              <span>Data</span>
+              <button class="copy-btn" @click.stop="copyJson">
+                {{ copied ? '✓ Copied' : '📋 Copy' }}
+              </button>
+            </div>
+            <pre class="json-content" v-html="highlightedJson"></pre>
+          </div>
+        </div>
+      `,
+      data() {
+        return {
+          isExpanded: false,
+          copied: false,
+        };
+      },
+      computed: {
+        formattedJson() {
+          try {
+            return JSON.stringify(this.entry.data, null, 2);
+          } catch {
+            return String(this.entry.data);
+          }
+        },
+        highlightedJson() {
+          let json = JSON.stringify(this.entry.data, null, 2);
+          json = this.cleanupPaths(json);
+          return this.syntaxHighlight(json);
+        },
+      },
+      methods: {
+        cleanupPaths(json) {
+          // Replace Windows home directory with ~
+          // JSON.stringify escapes backslashes, so C:\Users becomes C:\\Users in the string
+          json = json.replace(/C:\\\\Users\\\\BobbyJohnson/g, '~');
+
+          // Convert remaining escaped backslashes to forward slashes for readability
+          json = json.replace(/\\\\/g, '/');
+
+          return json;
+        },
+        syntaxHighlight(json) {
+          if (typeof json !== 'string') {
+            json = JSON.stringify(json, null, 2);
+          }
+          // Escape HTML entities
+          json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+          // Apply syntax highlighting
+          return json.replace(
+            /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+            function (match) {
+              let cls = 'json-number';
+              if (/^"/.test(match)) {
+                if (/:$/.test(match)) {
+                  cls = 'json-key';
+                } else {
+                  cls = 'json-string';
+                }
+              } else if (/true|false/.test(match)) {
+                cls = 'json-boolean';
+              } else if (/null/.test(match)) {
+                cls = 'json-null';
+              }
+              return '<span class="' + cls + '">' + match + '</span>';
+            }
+          );
+        },
+        toggle() {
+          this.isExpanded = !this.isExpanded;
+        },
+        formatTime(iso) {
+          try {
+            const date = new Date(iso);
+            return date.toLocaleTimeString('en-US', {
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+              hour12: false,
+            });
+          } catch {
+            return iso;
+          }
+        },
+        truncateId(id) {
+          if (!id || id.length <= 12) return id;
+          return id.substring(0, 8) + '...';
+        },
+        getSummary(entry) {
+          const data = entry.data || {};
+          const truncate = (str, len = 50) =>
+            str && str.length > len ? str.substring(0, len) + '...' : str;
+
+          switch (entry.event) {
+            case 'UserPromptSubmit':
+              return truncate(data.prompt || data.message || '');
+            case 'PreToolUse':
+              return data.tool_name || data.toolName || '';
+            case 'PostToolUse':
+              const toolName = data.tool_name || data.toolName || '';
+              const success = data.error ? '✗' : '✓';
+              return `${toolName} ${success}`;
+            case 'PostToolUseFailure':
+              const failedTool = data.tool_name || data.toolName || '';
+              const errorMsg = truncate(data.error || '', 30);
+              return `${failedTool} - ${errorMsg}`;
+            case 'SessionStart':
+            case 'SessionEnd':
+              return `Session: ${truncate(entry.session_id || '', 20)}`;
+            case 'SubagentStart':
+            case 'SubagentStop':
+              return data.subagent_type || data.type || '';
+            case 'Notification':
+              return truncate(data.message || data.notification || '');
+            case 'PermissionRequest':
+              return data.permission_type || data.permission || '';
+            case 'PreCompact':
+              return truncate(data.reason || 'Context compaction');
+            case 'Stop':
+              return truncate(data.reason || 'User interrupt');
+            default:
+              return '';
+          }
+        },
+        async copyJson() {
+          try {
+            const fullEntry = JSON.stringify(this.entry, null, 2);
+            await navigator.clipboard.writeText(fullEntry);
+            this.copied = true;
+            setTimeout(() => {
+              this.copied = false;
+            }, 2000);
+          } catch (err) {
+            console.error('Failed to copy:', err);
+          }
+        },
+      },
+    });
+
+    // ===== LogViewer Component =====
+    app.component('log-viewer', {
+      props: {
+        entries: {
+          type: Array,
+          default: () => [],
+        },
+        sessions: {
+          type: Array,
+          default: () => [],
+        },
+        currentSession: {
+          type: String,
+          default: null,
+        },
+        selectedSession: {
+          type: String,
+          default: null,
+        },
+      },
+      emits: ['update:selectedSession'],
+      template: `
+        <div class="log-viewer">
+          <filter-bar
+            v-model="filters"
+            :sessions="sessions"
+            :current-session="currentSession"
+            :selected-session="selectedSession"
+            @update:selected-session="$emit('update:selectedSession', $event)"
+          ></filter-bar>
+
+          <div class="log-viewer-controls">
+            <label class="auto-scroll-toggle">
+              <input type="checkbox" v-model="autoScroll" />
+              Auto-scroll to new entries
+            </label>
+            <span class="entry-count">
+              Showing {{ filteredEntries.length }} of {{ entries.length }} entries
+            </span>
+          </div>
+
+          <div
+            v-if="filteredEntries.length === 0"
+            class="empty-state"
+          >
+            <h3>No entries found</h3>
+            <p v-if="hasFilters">Try adjusting your filters</p>
+            <p v-else>Waiting for log entries...</p>
+          </div>
+
+          <div
+            v-else
+            ref="logList"
+            class="log-list"
+          >
+            <log-entry
+              v-for="entry in filteredEntries"
+              :key="entryKey(entry)"
+              :entry="entry"
+            ></log-entry>
+          </div>
+        </div>
+      `,
+      data() {
+        return {
+          filters: {
+            search: '',
+            eventTypes: [],
+            sessionId: null,
+          },
+          autoScroll: true,
+        };
+      },
+      computed: {
+        uniqueSessions() {
+          const sessions = new Set(this.entries.map(e => e.session_id));
+          return Array.from(sessions).sort();
+        },
+        filteredEntries() {
+          return this.entries.filter(entry => {
+            // Search filter
+            if (this.filters.search) {
+              const searchLower = this.filters.search.toLowerCase();
+              const matchesSearch =
+                entry.event.toLowerCase().includes(searchLower) ||
+                entry.session_id.toLowerCase().includes(searchLower) ||
+                JSON.stringify(entry.data).toLowerCase().includes(searchLower);
+              if (!matchesSearch) return false;
+            }
+
+            // Event type filter
+            if (this.filters.eventTypes.length > 0) {
+              if (!this.filters.eventTypes.includes(entry.event)) {
+                return false;
+              }
+            }
+
+            // Session filter
+            if (this.filters.sessionId) {
+              if (entry.session_id !== this.filters.sessionId) {
+                return false;
+              }
+            }
+
+            return true;
+          }).slice().reverse();
+        },
+        hasFilters() {
+          return (
+            this.filters.search ||
+            this.filters.eventTypes.length > 0 ||
+            this.filters.sessionId
+          );
+        },
+      },
+      methods: {
+        entryKey(entry) {
+          return `${entry.timestamp}-${entry.event}-${entry.session_id}`;
+        },
+        scrollToTop() {
+          if (!this.autoScroll || !this.$refs.logList) return;
+          this.$nextTick(() => {
+            const list = this.$refs.logList;
+            list.scrollTop = 0;
+          });
+        },
+      },
+      watch: {
+        entries: {
+          handler() {
+            this.scrollToTop();
+          },
+          deep: false,
+        },
+      },
+    });
+
+    // ===== TabContainer Component =====
+    app.component('tab-container', {
+      props: {
+        tabs: {
+          type: Array,
+          default: () => [
+            { id: 'logs', label: 'Event Log' },
+            // Future tabs:
+            // { id: 'analytics', label: 'Analytics' },
+            // { id: 'sessions', label: 'Sessions' },
+          ],
+        },
+        activeTab: {
+          type: String,
+          default: 'logs',
+        },
+      },
+      emits: ['update:activeTab'],
+      template: `
+        <div class="tab-container">
+          <nav class="tabs">
+            <button
+              v-for="tab in tabs"
+              :key="tab.id"
+              class="tab"
+              :class="{ active: activeTab === tab.id }"
+              @click="selectTab(tab.id)"
+            >
+              {{ tab.label }}
+            </button>
+          </nav>
+
+          <div class="tab-content">
+            <slot :name="activeTab">
+              <slot></slot>
+            </slot>
+          </div>
+        </div>
+      `,
+      methods: {
+        selectTab(id) {
+          this.$emit('update:activeTab', id);
+        },
+      },
+    });
+
+    // Mount the app
+    app.mount('#app');
+  </script>
+</body>
+</html>
