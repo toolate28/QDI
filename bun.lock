@@ -35,6 +35,14 @@
         "@ax-llm/ax": "^9.0.0",
       },
     },
+    "packages/core": {
+      "name": "@spiralsafe/core",
+      "version": "1.0.0",
+      "dependencies": {
+        "@spiralsafe/atom-trail": "workspace:*",
+        "@spiralsafe/wave-toolkit": "workspace:*",
+      },
+    },
     "packages/wave-toolkit": {
       "name": "@spiralsafe/wave-toolkit",
       "version": "1.0.0",
@@ -100,6 +108,8 @@
     "@spiralsafe/atom-trail": ["@spiralsafe/atom-trail@workspace:packages/atom-trail"],
 
     "@spiralsafe/ax-signatures": ["@spiralsafe/ax-signatures@workspace:packages/ax-signatures"],
+
+    "@spiralsafe/core": ["@spiralsafe/core@workspace:packages/core"],
 
     "@spiralsafe/mcp-server": ["@spiralsafe/mcp-server@workspace:apps/mcp-server"],
 
