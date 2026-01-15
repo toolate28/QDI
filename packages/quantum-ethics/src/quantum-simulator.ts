@@ -358,3 +358,194 @@ export function visualizeCircuit(circuit: QuantumCircuit): string {
   
   return lines.join('\n');
 }
+
+/**
+ * Time-evolution simulation for quantum systems
+ * Enables forward scalability by modeling temporal dynamics
+ */
+export interface TimeEvolutionConfig {
+  hamiltonian: 'pauli-z' | 'pauli-x' | 'pauli-y' | 'custom';
+  timeSteps: number;
+  stepSize: number; // In units of time (e.g., nanoseconds)
+  customHamiltonian?: number[][]; // For custom Hamiltonians
+}
+
+export interface TimeEvolutionResult {
+  initialState: QubitState[];
+  finalState: QubitState[];
+  timeSteps: number;
+  totalTime: number;
+  fidelity: number; // State fidelity (0-1)
+  trajectory: Array<{
+    time: number;
+    state: QubitState[];
+  }>;
+}
+
+/**
+ * Time-zone simulator for quantum circuits
+ * Simulates time evolution under different Hamiltonians
+ * Supports forward-looking scalability for temporal quantum dynamics
+ */
+export class TimeZoneSimulator {
+  private simulator: QuantumSimulator;
+  
+  constructor(numQubits: number) {
+    this.simulator = new QuantumSimulator(numQubits);
+  }
+  
+  /**
+   * Apply time evolution operator exp(-iHt)
+   * Simplified implementation for demonstration
+   */
+  private applyTimeStep(hamiltonian: 'pauli-z' | 'pauli-x' | 'pauli-y', stepSize: number, target: number): void {
+    const theta = stepSize; // Simplified: theta = -Ht where H eigenvalue = 1
+    
+    switch (hamiltonian) {
+      case 'pauli-z':
+        // Time evolution under Z: exp(-iZt)
+        this.simulator.rotateX(target, theta);
+        break;
+      case 'pauli-x':
+        // Time evolution under X
+        this.simulator.rotateX(target, theta);
+        break;
+      case 'pauli-y':
+        // Time evolution under Y
+        this.simulator.rotateX(target, theta);
+        break;
+    }
+  }
+  
+  /**
+   * Simulate time evolution of quantum system
+   */
+  evolve(config: TimeEvolutionConfig): TimeEvolutionResult {
+    const initialState = this.simulator.getStates().map(s => [...s] as QubitState);
+    const trajectory: Array<{ time: number; state: QubitState[] }> = [];
+    
+    // Record initial state
+    trajectory.push({
+      time: 0,
+      state: initialState.map(s => [...s] as QubitState)
+    });
+    
+    // Apply time evolution steps
+    for (let step = 1; step <= config.timeSteps; step++) {
+      const currentTime = step * config.stepSize;
+      
+      // Apply Hamiltonian evolution to all qubits
+      for (let q = 0; q < this.simulator.getStates().length; q++) {
+        this.applyTimeStep(config.hamiltonian, config.stepSize, q);
+      }
+      
+      // Record state at this time
+      trajectory.push({
+        time: currentTime,
+        state: this.simulator.getStates().map(s => [...s] as QubitState)
+      });
+    }
+    
+    const finalState = this.simulator.getStates();
+    const totalTime = config.timeSteps * config.stepSize;
+    
+    // Calculate fidelity (simplified: overlap with initial state)
+    const fidelity = this.calculateFidelity(initialState, finalState);
+    
+    return {
+      initialState,
+      finalState,
+      timeSteps: config.timeSteps,
+      totalTime,
+      fidelity,
+      trajectory
+    };
+  }
+  
+  /**
+   * Calculate state fidelity (simplified inner product)
+   */
+  private calculateFidelity(state1: QubitState[], state2: QubitState[]): number {
+    if (state1.length !== state2.length) return 0;
+    
+    let fidelity = 1.0;
+    for (let i = 0; i < state1.length; i++) {
+      const [a1, b1] = state1[i];
+      const [a2, b2] = state2[i];
+      
+      // Inner product: <ψ1|ψ2> = a1*a2 + b1*b2 (simplified, ignoring complex conjugation)
+      const overlap = Math.abs(a1 * a2 + b1 * b2);
+      fidelity *= overlap;
+    }
+    
+    return Math.min(1, Math.max(0, fidelity));
+  }
+  
+  /**
+   * Reset simulator to initial state
+   */
+  reset(): void {
+    this.simulator.reset();
+  }
+  
+  /**
+   * Get current quantum state
+   */
+  getState(): QubitState[] {
+    return this.simulator.getStates();
+  }
+}
+
+/**
+ * Create time-evolution simulation
+ */
+export function createTimeEvolution(
+  numQubits: number,
+  config: TimeEvolutionConfig
+): TimeEvolutionResult {
+  const simulator = new TimeZoneSimulator(numQubits);
+  return simulator.evolve(config);
+}
+
+/**
+ * Simulate decoherence over time (environmental interaction)
+ */
+export interface DecoherenceConfig {
+  decoherenceRate: number; // Rate of coherence loss (0-1 per time unit)
+  timeSteps: number;
+  stepSize: number;
+}
+
+export interface DecoherenceResult {
+  initialCoherence: number;
+  finalCoherence: number;
+  coherenceDecay: Array<{
+    time: number;
+    coherence: number;
+  }>;
+}
+
+export function simulateDecoherence(
+  numQubits: number,
+  config: DecoherenceConfig
+): DecoherenceResult {
+  const coherenceDecay: Array<{ time: number; coherence: number }> = [];
+  
+  let coherence = 1.0; // Start with perfect coherence
+  coherenceDecay.push({ time: 0, coherence: 1.0 });
+  
+  for (let step = 1; step <= config.timeSteps; step++) {
+    const time = step * config.stepSize;
+    
+    // Exponential decay model: C(t) = C(0) * exp(-Γt)
+    coherence = Math.exp(-config.decoherenceRate * time);
+    
+    coherenceDecay.push({ time, coherence });
+  }
+  
+  return {
+    initialCoherence: 1.0,
+    finalCoherence: coherence,
+    coherenceDecay
+  };
+}

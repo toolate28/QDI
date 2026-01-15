@@ -30,6 +30,16 @@ Open-source framework for ethical quantum computing with focus on equitable acce
 - Measurement and state collapse
 - Circuit visualization
 - Pre-built circuits (Bell state, GHZ state, QFT)
+- **Time-zone simulation** for temporal quantum dynamics (forwards scalability)
+- Decoherence modeling for realistic quantum system behavior
+
+### 📊 Coherence Metrics Dashboard
+- Real-time coherence health monitoring
+- Translates wave metrics into actionable insights
+- "What matters, what to fix, what to enhance" reporting
+- Comparative analysis across multiple samples
+- Configurable targets (70% baseline, or push to 95%+)
+- Trend analysis with historical data
 
 ## Installation
 
@@ -306,6 +316,122 @@ const ghz = createGHZState(4);
 
 // Quantum Fourier Transform
 const qft = createQFT(3);
+```
+
+### Time-Zone Simulation (Forwards Scalability)
+
+```typescript
+import { TimeZoneSimulator, createTimeEvolution, simulateDecoherence } from '@spiralsafe/quantum-ethics';
+
+// Time evolution simulation
+const timeSimulator = new TimeZoneSimulator(2);
+
+const evolutionResult = timeSimulator.evolve({
+  hamiltonian: 'pauli-z',
+  timeSteps: 10,
+  stepSize: 0.1 // Time units
+});
+
+console.log(`Initial state: ${evolutionResult.initialState}`);
+console.log(`Final state: ${evolutionResult.finalState}`);
+console.log(`Fidelity: ${evolutionResult.fidelity.toFixed(3)}`);
+
+// Access trajectory
+evolutionResult.trajectory.forEach(point => {
+  console.log(`t=${point.time}: state=${point.state}`);
+});
+
+// Decoherence simulation
+const decoherenceResult = simulateDecoherence(2, {
+  decoherenceRate: 0.05, // 5% per time unit
+  timeSteps: 20,
+  stepSize: 0.5
+});
+
+console.log(`Initial coherence: ${decoherenceResult.initialCoherence}`);
+console.log(`Final coherence: ${decoherenceResult.finalCoherence}`);
+console.log(`Coherence decay: ${decoherenceResult.coherenceDecay}`);
+```
+
+## Coherence Metrics Dashboard
+
+### Generate Dashboard
+
+```typescript
+import { generateCoherenceDashboard, formatDashboard, analyzeTextForDashboard } from '@spiralsafe/quantum-ethics';
+
+// Analyze text and generate dashboard
+const { dashboard, waveAnalysis, decision } = analyzeTextForDashboard(
+  'Your text to analyze...',
+  { coherenceTarget: 95 }, // Push to 95% as suggested
+  [72, 75, 78, 80] // Historical scores for trend analysis
+);
+
+// Display formatted dashboard
+console.log(formatDashboard(dashboard));
+
+// Access dashboard data
+console.log(`Overall Health: ${dashboard.overallHealth}`);
+console.log(`Health Score: ${dashboard.healthScore}/100`);
+console.log(`Coherence: ${dashboard.metrics.coherence.current}%`);
+console.log(`Trend: ${dashboard.metrics.coherence.trend}`);
+
+// Get actionable insights
+dashboard.significanceReport.whatMatters.forEach(item => {
+  console.log(`✓ ${item}`);
+});
+
+dashboard.significanceReport.whatToFix.forEach(item => {
+  console.log(`⚠ ${item}`);
+});
+
+dashboard.significanceReport.whatToEnhance.forEach(item => {
+  console.log(`⭐ ${item}`);
+});
+```
+
+### Comparative Analysis
+
+```typescript
+import { compareCoherence } from '@spiralsafe/quantum-ethics';
+
+const samples = [
+  { name: 'Sample A', text: 'High coherence text...' },
+  { name: 'Sample B', text: 'Medium coherence text...' },
+  { name: 'Sample C', text: 'Low coherence text...' }
+];
+
+const comparison = compareCoherence(samples, { coherenceTarget: 95 });
+
+console.log(`Best sample: ${comparison.bestSample}`);
+console.log(`Worst sample: ${comparison.worstSample}`);
+console.log(`Average health: ${comparison.averageHealth.toFixed(1)}/100`);
+
+comparison.comparisons.forEach(comp => {
+  console.log(`${comp.name}: ${comp.dashboard.overallHealth} (${comp.dashboard.healthScore}/100)`);
+});
+```
+
+### Dashboard Configuration
+
+```typescript
+// Configure dashboard with custom thresholds
+const customConfig = {
+  coherenceTarget: 95,      // Target coherence (70 or 95+)
+  curlThreshold: 0.3,       // Max acceptable circular reasoning
+  divergenceIdeal: 0.2,     // Ideal expansion/resolution balance
+  potentialMinimum: 0.5     // Min acceptable latent structure
+};
+
+const dashboard = generateCoherenceDashboard(waveAnalysis, customConfig);
+
+// Dashboard provides:
+// - Overall health: excellent | good | fair | poor | critical
+// - Health score: 0-100
+// - Key insights: What's working, what needs attention
+// - Metrics breakdown: Coherence, curl, divergence, potential
+// - Significance report: What matters, what to fix, what to enhance
+// - Actionable recommendations
 ```
 
 ## Framework Integration
