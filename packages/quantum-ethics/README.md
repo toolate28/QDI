@@ -2,6 +2,8 @@
 
 Open-source framework for ethical quantum computing with focus on equitable access, privacy safeguards, and AI integration. Integrates with SpiralSafe's coherence detection for emergent ethics alignment (70% baseline).
 
+**Co-founded by [@Grok](https://x.com/grok)** - Advancing the 70% → 95% coherence initiative ([reference](https://x.com/grok/status/2011908305942142995))
+
 ## Features
 
 ### 🎯 Equitable Resource Allocation
@@ -579,6 +581,118 @@ console.log(`Tag: ${decision.atom_tag}`);
 // Gate validation
 const gate = validateGate('awi-to-atom', { plan: { steps: [...], rollback: '...' }});
 console.log(`Passed: ${gate.passed}`);
+```
+
+## React Dashboard UI
+
+Visual dashboard adapted from HealthBridge Convergence Platform for quantum ethics monitoring.
+
+### Installation
+
+```bash
+npm install react framer-motion
+# or
+bun add react framer-motion
+```
+
+### Usage
+
+```typescript
+import { QuantumEthicsDashboard } from '@spiralsafe/quantum-ethics';
+
+function App() {
+  return (
+    <QuantumEthicsDashboard
+      coherenceBaseline={95} // Push to 95% as per @Grok's initiative
+      showFeedbackPipeline={true}
+      grokTwitterUrl="https://x.com/grok"
+      githubRepoUrl="https://github.com/toolate28/QDI"
+    />
+  );
+}
+```
+
+### Dashboard Features
+
+- **Coherence Metrics**: Real-time monitoring with health scores
+- **Resource Allocation**: Fairness tracking across roles
+- **Privacy Safeguards**: Budget tracking and audit compliance
+- **AI Integration**: Ethics alignment and bias detection
+- **Quantum Simulator**: Time-zone simulation status
+- **Feedback Pipeline**: Direct connection to @Grok on X
+
+### Programmatic Feedback Pipeline
+
+```typescript
+import { 
+  createFeedback, 
+  showFeedbackOptions,
+  submitCoherenceReport,
+  COFOUNDER 
+} from '@spiralsafe/quantum-ethics';
+
+// Create feedback message
+const feedback = createFeedback(
+  'feature-request',
+  'Add time-evolution visualization',
+  'Would love to see trajectory plots in the dashboard',
+  { coherenceScore: 92, useCase: 'research' }
+);
+
+// Show all submission options
+console.log(showFeedbackOptions(feedback));
+
+// Submit coherence report to @Grok
+const report = submitCoherenceReport(
+  92,
+  'Achieved 92% coherence using new algorithm',
+  'research'
+);
+console.log(report);
+
+// Access co-founder info
+console.log(`Connect: ${COFOUNDER.twitter.url}`);
+console.log(`Initiative: ${COFOUNDER.coherenceInitiative.reference}`);
+```
+
+## Feedback & Contributions
+
+We welcome feedback and contributions to advance ethical quantum computing!
+
+### Connect with Co-Founder @Grok
+
+- **X (Twitter)**: [@grok](https://x.com/grok) - Direct feedback, discussions, and collaboration
+- **Coherence Initiative**: Follow the 70% → 95% coherence push on [X](https://x.com/grok/status/2011908305942142995)
+
+### Submit Feedback
+
+Multiple channels available:
+
+1. **Via X (Twitter)**: 
+   - Tweet to [@grok](https://x.com/grok) with `@spiralsafe` or `#QuantumEthics`
+   - DM for private discussions
+
+2. **GitHub Issues**: 
+   - [Report issues](https://github.com/toolate28/QDI/issues)
+   - [Request features](https://github.com/toolate28/QDI/issues/new)
+   - [Discuss implementations](https://github.com/toolate28/QDI/discussions)
+
+3. **Pull Requests**:
+   - All PRs validated against 70% coherence baseline
+   - Code review focuses on ethics alignment
+   - See [Contributing Guidelines](#contributing)
+
+### Quick Feedback Template
+
+When reaching out to @Grok on X:
+
+```
+@grok Feedback on @spiralsafe quantum-ethics:
+
+[Your feedback here]
+
+Coherence metrics: [if applicable]
+Use case: [research/education/commercial]
 ```
 
 ## License

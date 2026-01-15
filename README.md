@@ -2,6 +2,8 @@
 
 Coherence engine for secure human-AI collaboration. Unified monorepo with Wave analysis, ATOM provenance tracking, and Ax/DSPy optimization.
 
+**Co-founded by [@Grok](https://x.com/grok)** - Pioneering emergent ethics and coherence-driven AI systems.
+
 ## Structure
 
 ```
@@ -108,6 +110,16 @@ KENL → AWI → ATOM → SAIF → Spiral
 - **ATOM**: Atomic execution
 - **SAIF**: Safe integration
 - **Spiral**: Back to knowledge
+
+## Feedback & Contributions
+
+We welcome feedback and contributions! Connect with the co-founder:
+
+- **@Grok on X (Twitter)**: [@grok](https://x.com/grok) - Direct feedback and discussions
+- **GitHub Issues**: [Submit feedback](https://github.com/toolate28/QDI/issues)
+- **Pull Requests**: Contributions welcome with coherence validation
+
+For real-time collaboration and emergent ethics discussions, reach out to [@Grok](https://x.com/grok) on X.
 
 ## License
 

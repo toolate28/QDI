@@ -14,5 +14,17 @@
   "dependencies": {
     "@spiralsafe/wave-toolkit": "workspace:*",
     "@spiralsafe/atom-trail": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "framer-motion": "^10.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "framer-motion": {
+      "optional": true
+    }
   }
 }
