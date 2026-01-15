@@ -22,7 +22,8 @@
     "paths": {
       "@spiralsafe/wave-toolkit": ["packages/wave-toolkit/src/index.ts"],
       "@spiralsafe/atom-trail": ["packages/atom-trail/src/index.ts"],
-      "@spiralsafe/ax-signatures": ["packages/ax-signatures/src/index.ts"]
+      "@spiralsafe/ax-signatures": ["packages/ax-signatures/src/index.ts"],
+      "@spiralsafe/core/privacy": ["packages/core/privacy/index.ts"]
     }
   },
   "include": ["apps/**/*", "packages/**/*", "types/**/*"],
