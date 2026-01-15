@@ -11,3 +11,4 @@ export * from './privacy-safeguards';
 export * from './ai-integration';
 export * from './quantum-simulator';
 export * from './framework';
+export * from './coherence-dashboard';
