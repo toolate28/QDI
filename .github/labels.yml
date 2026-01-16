@@ -24,6 +24,19 @@
   color: "7057ff"
   description: "Vortex wave tracking across nodes"
 
+# === Workflow Control Labels ===
+- name: "coherence-override"
+  color: "ff6b6b"
+  description: "Bypass coherence check (Penrose staircase escape hatch)"
+
+- name: "emergency-merge"
+  color: "d73a4a"
+  description: "Emergency merge bypass for critical fixes"
+
+- name: "vortex-synchronized"
+  color: "00d4aa"
+  description: "Snap-in achieved - synchronized across vortex"
+
 # === Phase Gate Labels (KENL → AWI → ATOM → SAIF → Spiral) ===
 - name: "phase:KENL"
   color: "e99695"
