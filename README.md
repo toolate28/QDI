@@ -16,6 +16,7 @@ spiralsafe/
 │   ├── ax-signatures/   # Ax/DSPy optimization signatures
 │   └── quantum-ethics/  # Ethical quantum computing framework
 ├── scripts/
+│   ├── setup.ts         # Auto-setup for new users
 │   └── atom-tag.ts      # ATOM auto-tagging
 └── .claude/
     └── hooks/           # Claude Code hooks (Bun)
@@ -23,8 +24,25 @@ spiralsafe/
 
 ## Quick Start
 
+### New User Setup (Recommended)
+
+The auto-setup script provides seamless onboarding:
+
 ```bash
-# Install
+# One-command setup - installs dependencies, configures ATOM trail, verifies environment
+bun run setup
+
+# Check environment without making changes
+bun run setup:check
+
+# Force reinstall (clean slate)
+bun run setup -- --force
+```
+
+### Manual Setup
+
+```bash
+# Install dependencies
 bun install
 
 # Run MCP server
