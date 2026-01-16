@@ -9,7 +9,6 @@
 
 import { QuantumEthicsFramework } from '../src/framework';
 import { createQuantumCircuit } from '../src/quantum-simulator';
-import { QiskitIntegration } from '../src/qiskit-integration';
 import { ProvenanceTracker } from '../src/provenance-tracking';
 import { ConfigurationManager } from '../src/config-toggles';
 
