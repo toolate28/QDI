@@ -224,11 +224,13 @@ for (const useCase of useCases) {
 }
 
 console.log('\n=== Demo Complete ===');
+console.log('\nNote: In this demo, Qiskit/quantum execution is mocked or simulated.');
+console.log('Real deployments should replace the mocked async calls with actual Qiskit backends or quantum hardware integrations.');
 console.log('\nKey Features Demonstrated:');
 console.log('  ✓ JSON-based configuration management');
 console.log('  ✓ Comprehensive provenance tracking');
 console.log('  ✓ ATOM decision integration');
 console.log('  ✓ Audit trail verification');
-console.log('  ✓ Qiskit backend support');
+console.log('  ✓ Qiskit backend support (mocked in this demo)');
 console.log('  ✓ Coherence-based validation');
 console.log('  ✓ Thread-safe execution tracking');
