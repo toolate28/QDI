@@ -46,7 +46,7 @@ jobs:
 
       - name: Setup Bun
         if: steps.check_override.outputs.skip != 'true'
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
