@@ -137,7 +137,12 @@ export class QiskitIntegration {
         unlinkSync(scriptPath);
         unlinkSync(outputPath);
       } catch (e) {
-        // Ignore cleanup errors
+        // Log cleanup errors at debug level without interrupting main flow
+        console.debug('QiskitIntegration: Failed to clean up temporary files', {
+          scriptPath,
+          outputPath,
+          error: e
+        });
       }
     }
   }
