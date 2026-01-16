@@ -2,7 +2,7 @@
 # Qiskit integration and testing
 
 # Quantum computing framework
-qiskit>=1.0,<3.0
+qiskit>=1.0,<2.0
 qiskit-aer>=0.14,<1.0
 
 # Testing and benchmarking
