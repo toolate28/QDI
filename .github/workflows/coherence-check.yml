@@ -40,7 +40,7 @@ jobs:
             return hasOverride;
       - name: Checkout repository
         if: steps.check_override.outputs.skip != 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
