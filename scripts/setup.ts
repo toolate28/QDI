@@ -15,7 +15,7 @@
 import { $ } from "bun";
 import { existsSync, rmSync } from "fs";
 import { mkdir, writeFile } from "fs/promises";
-import { join } from "path";
+import { join, resolve } from "path";
 
 const ROOT_DIR = join(import.meta.dir, "..");
 const ATOM_TRAIL_DIR = join(ROOT_DIR, ".atom-trail");
@@ -101,9 +101,11 @@ async function installDependencies(force: boolean): Promise<boolean> {
     const nodeModulesPath = join(ROOT_DIR, "node_modules");
     if (force) {
       log("step", "Force reinstalling dependencies...");
-      // Validate path before removal for safety
-      if (existsSync(nodeModulesPath) && nodeModulesPath.endsWith("node_modules")) {
-        rmSync(nodeModulesPath, { recursive: true, force: true });
+      // Validate path before removal for safety - ensure it resolves to expected location
+      const resolvedPath = resolve(nodeModulesPath);
+      const expectedPath = resolve(ROOT_DIR, "node_modules");
+      if (existsSync(resolvedPath) && resolvedPath === expectedPath) {
+        rmSync(resolvedPath, { recursive: true, force: true });
       }
       await $`cd ${ROOT_DIR} && bun install`.quiet();
     } else {
