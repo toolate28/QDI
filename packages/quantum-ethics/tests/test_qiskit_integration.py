@@ -98,8 +98,8 @@ class TestQuantumGates:
         
         # X gate should flip |0⟩ to |1⟩
         count_keys = list(counts.keys())
-        assert any(key.startswith('1') for key in count_keys)
-        total_1 = sum(v for k, v in counts.items() if k.startswith('1'))
+        assert any(key.replace(' ', '').endswith('1') for key in count_keys)
+        total_1 = sum(v for k, v in counts.items() if k.replace(' ', '').endswith('1'))
         assert total_1 == 100
     
     def test_rotation_gates(self):
