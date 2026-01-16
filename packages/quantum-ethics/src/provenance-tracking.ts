@@ -374,8 +374,11 @@ export class ProvenanceTracker {
     successRate: number;
   } {
     const circuits = Array.from(this.circuitProvenance.values());
-    const avgCoherence = circuits.reduce((sum, c) => sum + (c.coherenceScore || 0), 0) / circuits.length || 0;
-    
+    let avgCoherence = 0;
+    if (circuits.length > 0) {
+      avgCoherence =
+        circuits.reduce((sum, c) => sum + (c.coherenceScore || 0), 0) / circuits.length;
+    }
     const successCount = this.auditTrail.filter(a => a.result === 'success').length;
     const successRate = this.auditTrail.length > 0 ? successCount / this.auditTrail.length : 0;
 
