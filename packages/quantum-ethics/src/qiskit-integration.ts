@@ -40,8 +40,8 @@ export interface QiskitProvenance {
   backend: string;
   timestamp: string;
   gates: QuantumGate[];
-  parameters: Record<string, any>;
-  results: any;
+  parameters: Record<string, unknown>;
+  results: Record<string, number>;
   coherenceScore?: number;
 }
 
@@ -72,7 +72,6 @@ function getNoiseLevel(noiseModel: string): string {
       return '0.02';
     case 'low':
       return '0.005';
-    case 'ideal':
     default:
       return '0.005';
   }
@@ -81,8 +80,8 @@ function getNoiseLevel(noiseModel: string): string {
 /**
  * Validate gate parameter is a valid number within reasonable bounds
  */
-function validateGateParameter(param: any, name: string): number {
-  if (typeof param !== 'number' || !isFinite(param)) {
+function validateGateParameter(param: unknown, name: string): number {
+  if (typeof param !== 'number' || !Number.isFinite(param)) {
     throw new Error(`Invalid ${name}: must be a finite number`);
   }
   return param;
@@ -91,7 +90,7 @@ function validateGateParameter(param: any, name: string): number {
 /**
  * Validate qubit count is within reasonable bounds
  */
-function validateQubitCount(qubits: any): number {
+function validateQubitCount(qubits: unknown): number {
   const count = Number(qubits);
   if (!Number.isInteger(count) || count < 1 || count > 100) {
     throw new Error(`Invalid qubit count: ${qubits}. Must be an integer between 1 and 100`);
@@ -403,7 +402,7 @@ except Exception as e:
           }
         });
 
-        pythonProcess.on('error', (error: any) => {
+        pythonProcess.on('error', (error: Error & { code?: string }) => {
           // If python3 is not found, try falling back to "python"
           if (error && error.code === 'ENOENT' && pythonExecutable === 'python3') {
             runPython('python');
