@@ -137,7 +137,7 @@ The repository includes a GitHub Actions-based coding agent for automated ethica
 
 ```bash
 # Install Python dependencies for quantum simulations
-pip install qiskit pytest
+pip install qiskit
 
 # Run agent skills locally
 python agent_skills.py simulate
