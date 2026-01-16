@@ -8,6 +8,7 @@ performance benchmarking, and provenance tracking.
 import json
 import pytest
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
+from qiskit.qasm3 import dumps
 from qiskit_aer import AerSimulator, StatevectorSimulator
 from qiskit_aer.noise import NoiseModel, depolarizing_error
 
@@ -244,7 +245,6 @@ class TestCircuitSerialization:
         qc.measure_all()
         
         # Get QASM representation (use qasm3 in Qiskit 2.x)
-        from qiskit.qasm3 import dumps
         qasm = dumps(qc)
         assert 'h' in qasm.lower()
         assert 'cx' in qasm.lower() or 'cnot' in qasm.lower()
