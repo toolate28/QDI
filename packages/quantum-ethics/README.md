@@ -994,8 +994,8 @@ bun test packages/quantum-ethics/src/__tests__/config-toggles.test.ts
 ### Python Tests (PyTest)
 
 ```bash
-# Install dependencies
-pip install qiskit qiskit-aer pytest pytest-benchmark
+# Install dependencies (pinned to known-compatible major versions)
+pip install "qiskit>=1.0,<2.0" "qiskit-aer>=0.14,<0.15" "pytest>=7,<8" "pytest-benchmark>=4,<5"
 
 # Run Qiskit integration tests
 cd packages/quantum-ethics
