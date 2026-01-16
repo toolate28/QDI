@@ -224,7 +224,8 @@ output = {
 ` : `
 from qiskit_aer import AerSimulator
 ${config.noise_model !== 'ideal' ? 'backend = AerSimulator(noise_model=noise_model)' : 'backend = AerSimulator()'}
-qc.measure_all()
+if not any(getattr(inst[0], "name", "") == "measure" for inst in qc.data):
+    qc.measure_all()
 job = backend.run(qc, shots=${config.shots || 1024})
 result = job.result()
 counts = result.get_counts()
