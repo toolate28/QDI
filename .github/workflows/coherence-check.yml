@@ -62,20 +62,28 @@ jobs:
         if: steps.check_override.outputs.skip != 'true'
         id: coherence
         run: |
-          # Extract PR description and commit messages
-          PR_BODY="${{ github.event.pull_request.body || '' }}"
+          # Write PR body to file to avoid shell injection
+          cat > /tmp/pr_body.txt << 'PRBODY'
+          ${{ github.event.pull_request.body }}
+          PRBODY
           
-          # Get commit messages from this PR
-          COMMITS=$(git log --format=%B origin/${{ github.base_ref }}..${{ github.sha }})
+          # Get commit messages from this PR with fallback handling
+          if git rev-parse --verify origin/${{ github.base_ref }} >/dev/null 2>&1; then
+            git log --format=%B origin/${{ github.base_ref }}..${{ github.sha }} > /tmp/commits.txt
+          else
+            echo "Warning: origin/${{ github.base_ref }} not found; falling back to base SHA range." >&2
+            git log --format=%B ${{ github.event.pull_request.base.sha }}..${{ github.sha }} > /tmp/commits.txt
+          fi
           
-          # Combine for analysis
-          TEXT_TO_ANALYZE="$PR_BODY\n\n$COMMITS"
-          
-          # Create analysis script
+          # Create analysis script that reads from files
           cat > /tmp/analyze.ts << 'EOF'
           import { analyzeWave } from './packages/wave-toolkit/src/index.ts';
+          import { readFileSync } from 'fs';
           
-          const text = process.argv[2] || '';
+          const prBody = readFileSync('/tmp/pr_body.txt', 'utf8');
+          const commits = readFileSync('/tmp/commits.txt', 'utf8');
+          const text = `${prBody}\n\n${commits}`;
+          
           const result = analyzeWave(text);
           
           console.log(JSON.stringify(result, null, 2));
@@ -89,7 +97,7 @@ jobs:
           
           # Run analysis
           set +e
-          RESULT=$(bun run /tmp/analyze.ts "$TEXT_TO_ANALYZE")
+          RESULT=$(bun run /tmp/analyze.ts)
           EXIT_CODE=$?
           set -e
           
@@ -150,7 +158,18 @@ jobs:
         with:
           script: |
             const score = '${{ steps.coherence.outputs.score }}';
-            const result = JSON.parse(`${{ steps.coherence.outputs.result }}`);
+            const rawResult = `${{ steps.coherence.outputs.result }}`;
+            
+            let result;
+            try {
+              result = JSON.parse(rawResult);
+            } catch (error) {
+              throw new Error(`Failed to parse coherence analysis result as JSON: ${error.message}`);
+            }
+            
+            if (!result || typeof result !== 'object' || !result.coherence || typeof result.coherence !== 'object' || !Array.isArray(result.warnings)) {
+              throw new Error('Coherence analysis result JSON does not have the expected structure.');
+            }
             
             let comment = `## ⚠️ Coherence Check Failed\n\n`;
             comment += `**Score: ${score}/100** (Minimum required: 60)\n\n`;
