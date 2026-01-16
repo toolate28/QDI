@@ -16,6 +16,9 @@ export * from './framework';
 export * from './coherence-dashboard';
 export * from './feedback-pipeline';
 export * from './vortex-wavespec';
+export * from './qiskit-integration';
+export * from './provenance-tracking';
+export * from './config-toggles';
 
 // UI Components (React)
 export { QuantumEthicsDashboard } from './dashboard-ui';

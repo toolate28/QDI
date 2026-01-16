@@ -1,0 +1,17 @@
+# Python dependencies for @spiralsafe/quantum-ethics
+# Qiskit integration and testing
+
+# Quantum computing framework
+qiskit>=1.0,<3.0
+qiskit-aer>=0.14,<1.0
+
+# Testing and benchmarking
+pytest>=7,<10
+pytest-benchmark>=4,<6
+
+# Optional: For IBM Quantum hardware access
+# qiskit-ibm-runtime>=0.15,<1.0
+
+# Development dependencies
+# black>=23.0,<24.0  # Code formatting
+# flake8>=6.0,<7.0  # Linting

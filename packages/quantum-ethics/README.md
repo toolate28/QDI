@@ -43,6 +43,30 @@ Open-source framework for ethical quantum computing with focus on equitable acce
 - Configurable targets (70% baseline, or push to 95%+)
 - Trend analysis with historical data
 
+### 🚀 **NEW: Qiskit Integration**
+- Real quantum backend support via Qiskit
+- Multiple backend options (AerSimulator, IBM Quantum, statevector)
+- Configurable noise models (low, medium, high)
+- Automatic circuit transpilation and optimization
+- Python-TypeScript bridge for seamless integration
+- Performance benchmarking with pytest
+
+### 📝 **NEW: Enhanced Provenance Tracking**
+- Comprehensive circuit execution history
+- Resource allocation tracking with ATOM decisions
+- Audit trail with integrity verification
+- User-level provenance queries
+- Export/import capabilities
+- Statistics and analytics
+
+### ⚙️ **NEW: JSON Configuration Toggles**
+- Dynamic configuration management
+- Filter settings: coherence baseline, timezone parity, noise scrubbing
+- Toggle switches: encrypt PII, simulate decoherence, fairness audit
+- Recommended presets for research, education, production, testing
+- Configuration history tracking
+- Validation and error checking
+
 ## Installation
 
 ```bash
@@ -654,6 +678,355 @@ console.log(report);
 console.log(`Connect: ${COFOUNDER.twitter.url}`);
 console.log(`Initiative: ${COFOUNDER.coherenceInitiative.reference}`);
 ```
+
+## Qiskit Integration
+
+### Real Quantum Backend Execution
+
+The framework now supports real quantum backend execution via Qiskit:
+
+```typescript
+import { QiskitIntegration, createQuantumCircuit } from '@spiralsafe/quantum-ethics';
+
+// Initialize Qiskit integration
+const qiskit = new QiskitIntegration({
+  backend: 'aer_simulator',
+  shots: 1024,
+  noise_model: 'high',
+  optimization_level: 1
+});
+
+// Create circuit
+const circuit = createQuantumCircuit(2, [
+  { type: 'H', target: 0 },
+  { type: 'CNOT', target: 1, control: 0 }
+]);
+
+// Execute on Qiskit backend
+const result = await qiskit.executeCircuit(circuit);
+
+console.log('Counts:', result.counts);
+console.log('Backend:', result.metadata.backend);
+console.log('Execution time:', result.metadata.executionTime, 'ms');
+```
+
+### Backend Options
+
+```typescript
+// AerSimulator (local, fast)
+const aer = new QiskitIntegration({
+  backend: 'aer_simulator',
+  shots: 1024
+});
+
+// Statevector Simulator (get full quantum state)
+const statevector = new QiskitIntegration({
+  backend: 'statevector_simulator'
+});
+const state = await statevector.getStatevector(circuit);
+
+// IBM Quantum (real hardware - requires token)
+const ibmq = new QiskitIntegration({
+  backend: 'ibmq',
+  ibmq_token: 'your-token',
+  ibmq_backend: 'ibmq_manila'
+});
+```
+
+### Noise Modeling
+
+```typescript
+// Configure noise levels
+const qiskit = new QiskitIntegration({
+  backend: 'aer_simulator',
+  noise_model: 'high', // 'low' | 'medium' | 'high'
+  shots: 2048
+});
+
+// Execute with noise
+const result = await qiskit.executeCircuit(circuit);
+```
+
+### Provenance Tracking
+
+All Qiskit executions automatically track provenance:
+
+```typescript
+const result = await qiskit.executeCircuit(circuit);
+
+// Access provenance record
+console.log('Circuit ID:', result.provenance.circuitId);
+console.log('Execution ID:', result.provenance.executionId);
+console.log('Backend:', result.provenance.backend);
+console.log('Parameters:', result.provenance.parameters);
+
+// Get full provenance log
+const log = qiskit.getProvenanceLog();
+console.log(`Total executions: ${log.length}`);
+
+// Export provenance
+qiskit.exportProvenance('/path/to/provenance.json');
+```
+
+## Enhanced Provenance Tracking
+
+### Track Circuit Execution
+
+```typescript
+import { ProvenanceTracker, createQuantumCircuit } from '@spiralsafe/quantum-ethics';
+
+const tracker = new ProvenanceTracker();
+
+// Create and execute circuit
+const circuit = createQuantumCircuit(2, [
+  { type: 'H', target: 0 },
+  { type: 'CNOT', target: 1, control: 0 }
+]);
+
+// Track execution
+const provenance = tracker.trackCircuitExecution('user-123', circuit, {
+  backend: 'aer_simulator',
+  executionTimeMs: 42,
+  coherenceScore: 85,
+  parameters: { shots: 1024, noise_model: 'high' }
+});
+
+console.log('Provenance ID:', provenance.provenanceId);
+console.log('ATOM Tag:', provenance.atomDecision.atom_tag);
+```
+
+### Track Resource Allocation
+
+```typescript
+// Track resource allocation with provenance
+const resourceProv = tracker.trackResourceAllocation('user-456', 'alloc-789', {
+  resourceType: 'quantum_compute',
+  resourceAmount: { qubits: 10, gateDepth: 50 },
+  fairnessScore: 0.92,
+  coherenceScore: 78,
+  purpose: 'Quantum ML research',
+  approved: true
+});
+```
+
+### Audit Trail Queries
+
+```typescript
+// Get all audit entries
+const audit = tracker.getAuditTrail();
+
+// Filter by user
+const userAudit = tracker.getAuditTrail({ userId: 'user-123' });
+
+// Filter by operation type
+const circuitAudit = tracker.getAuditTrail({ 
+  operationType: 'circuit_execution' 
+});
+
+// Filter by date range
+const recentAudit = tracker.getAuditTrail({
+  startDate: new Date('2024-01-01'),
+  endDate: new Date('2024-12-31')
+});
+```
+
+### Provenance Integrity Verification
+
+```typescript
+// Verify provenance integrity
+const integrity = tracker.verifyProvenanceIntegrity();
+
+if (integrity.valid) {
+  console.log('✓ Provenance chain is valid');
+} else {
+  console.log('✗ Integrity issues found:');
+  integrity.issues.forEach(issue => console.log(`  - ${issue}`));
+}
+```
+
+### Statistics and Analytics
+
+```typescript
+// Get provenance statistics
+const stats = tracker.getStatistics();
+
+console.log('Total circuits:', stats.totalCircuits);
+console.log('Total resources:', stats.totalResources);
+console.log('Average coherence:', stats.averageCoherence.toFixed(1), '%');
+console.log('Success rate:', (stats.successRate * 100).toFixed(1), '%');
+```
+
+### Export Provenance Data
+
+```typescript
+// Export all provenance data
+const exported = tracker.exportProvenance();
+
+console.log('Circuits:', exported.circuits.length);
+console.log('Resources:', exported.resources.length);
+console.log('Audit entries:', exported.audit.length);
+console.log('Chain length:', exported.chain.length);
+
+// Save to file
+import { writeFileSync } from 'fs';
+writeFileSync('provenance.json', JSON.stringify(exported, null, 2));
+```
+
+## JSON Configuration Toggles
+
+### Configuration Management
+
+```typescript
+import { ConfigurationManager } from '@spiralsafe/quantum-ethics';
+
+// Initialize with JSON configuration
+const config = new ConfigurationManager({
+  filters: {
+    coherenceBaseline: 0.8,  // 80% coherence threshold
+    timezoneParity: true,     // Fair scheduling across timezones
+    noiseScrub: 'high'        // Aggressive noise filtering
+  },
+  toggles: {
+    encryptPii: true,         // Encrypt personally identifiable info
+    simulateDecoherence: false, // Disable decoherence (faster)
+    fairnessAudit: true       // Enable fairness auditing
+  }
+});
+
+// Get current values
+const baseline = config.getFilter('coherenceBaseline');
+const encrypt = config.getToggle('encryptPii');
+```
+
+### Dynamic Updates
+
+```typescript
+// Update filters
+config.updateFilters({
+  coherenceBaseline: 0.9,
+  noiseScrub: 'medium'
+}, 'Increased quality requirements');
+
+// Update toggles
+config.updateToggles({
+  simulateDecoherence: true
+}, 'Enable realistic simulation');
+
+// Get configuration history
+const history = config.getConfigHistory();
+console.log(`Configuration changed ${history.length} times`);
+```
+
+### JSON Import/Export
+
+```typescript
+// Export to JSON
+const json = config.exportConfigToJSON();
+console.log(json);
+
+// Import from JSON
+const jsonString = `{
+  "filters": {
+    "coherenceBaseline": 0.8,
+    "timezoneParity": true,
+    "noiseScrub": "high"
+  },
+  "toggles": {
+    "encryptPii": true,
+    "simulateDecoherence": false,
+    "fairnessAudit": true
+  }
+}`;
+
+config.setConfigFromJSON(jsonString, 'Loaded from file');
+```
+
+### Recommended Presets
+
+```typescript
+// Get recommended configuration for use case
+const researchConfig = ConfigurationManager.getRecommendedConfig('research');
+const educationConfig = ConfigurationManager.getRecommendedConfig('education');
+const productionConfig = ConfigurationManager.getRecommendedConfig('production');
+const testingConfig = ConfigurationManager.getRecommendedConfig('testing');
+
+// Research config includes decoherence simulation
+console.log('Research decoherence:', researchConfig.toggles.simulateDecoherence); // true
+
+// Education config has lower baseline for learning
+console.log('Education baseline:', educationConfig.filters.coherenceBaseline); // 0.6
+
+// Production config has maximum security
+console.log('Production PII encryption:', productionConfig.toggles.encryptPii); // true
+```
+
+### Configuration Validation
+
+```typescript
+// Validate configuration
+const validation = config.validateConfiguration();
+
+if (validation.valid) {
+  console.log('✓ Configuration is valid');
+} else {
+  console.log('Configuration errors:');
+  validation.errors.forEach(err => console.log(`  ✗ ${err}`));
+}
+
+if (validation.warnings.length > 0) {
+  console.log('Configuration warnings:');
+  validation.warnings.forEach(warn => console.log(`  ⚠ ${warn}`));
+}
+```
+
+## Testing
+
+### TypeScript Tests (Bun)
+
+```bash
+# Run all tests
+bun test
+
+# Run specific test file
+bun test packages/quantum-ethics/src/__tests__/config-toggles.test.ts
+```
+
+### Python Tests (PyTest)
+
+```bash
+# Install dependencies (pinned to known-compatible major versions)
+pip install "qiskit>=1.0,<2.0" "qiskit-aer>=0.14,<0.15" "pytest>=7,<8" "pytest-benchmark>=4,<5"
+
+# Run Qiskit integration tests
+cd packages/quantum-ethics
+pytest tests/test_qiskit_integration.py -v
+
+# Run with benchmarks
+pytest tests/test_qiskit_integration.py -v --benchmark-only
+
+# Run specific test class
+pytest tests/test_qiskit_integration.py::TestQiskitBasics -v
+```
+
+## Performance Optimization
+
+### Runtime Optimization with PyTest
+
+The framework includes performance benchmarking tests:
+
+```bash
+# Run performance benchmarks
+pytest tests/test_qiskit_integration.py::TestPerformance -v --benchmark-only
+
+# Generate benchmark report
+pytest tests/test_qiskit_integration.py --benchmark-autosave
+```
+
+Benchmark results help optimize:
+- Circuit execution time
+- Provenance tracking overhead
+- Configuration management performance
+- Memory usage patterns
 
 ## Feedback & Contributions
 

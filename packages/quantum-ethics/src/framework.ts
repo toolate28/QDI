@@ -60,7 +60,7 @@ export interface QuantumEthicsConfig {
 /**
  * Default framework configuration
  */
-export const DEFAULT_CONFIG: QuantumEthicsConfig = {
+export const DEFAULT_FRAMEWORK_CONFIG: QuantumEthicsConfig = {
   resourcePolicy: DEFAULT_RESOURCE_POLICY,
   privacyPolicy: DEFAULT_PRIVACY_POLICY,
   coherenceBaseline: COHERENCE_BASELINE,
@@ -81,7 +81,7 @@ export class QuantumEthicsFramework {
   private trailEntries: TrailEntry[] = [];
   
   constructor(config: Partial<QuantumEthicsConfig> = {}) {
-    this.config = { ...DEFAULT_CONFIG, ...config };
+    this.config = { ...DEFAULT_FRAMEWORK_CONFIG, ...config };
     this.scheduler = new ResourceScheduler();
     this.privacyTracker = new PrivacyBudgetTracker(this.config.privacyPolicy.epsilon);
     this.auditTrail = new PrivacyAuditTrail();
