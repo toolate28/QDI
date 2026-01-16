@@ -1,0 +1,135 @@
+# GitHub Labels Configuration for QDI/SpiralSafe Repository
+# This file defines labels used in the repository
+# Labels are automatically synced via the label-sync workflow
+# Hub-and-spoke ecosystem: 6 repos with >60% emergent coherence
+
+# === Dependabot Required Labels ===
+- name: "dependencies"
+  color: "0366d6"
+  description: "Pull requests that update a dependency file"
+
+- name: "ATOM-maintenance"
+  color: "d4c5f9"
+  description: "ATOM provenance tracking and maintenance tasks"
+
+- name: "actions"
+  color: "000000"
+  description: "GitHub Actions workflow updates"
+
+- name: "spiral-preservation"
+  color: "fbca04"
+  description: "Spiral coherence preservation updates"
+
+- name: "vortex-wave"
+  color: "7057ff"
+  description: "Vortex wave tracking across nodes"
+
+# === Workflow Control Labels ===
+- name: "coherence-override"
+  color: "ff6b6b"
+  description: "Bypass coherence check (Penrose staircase escape hatch)"
+
+- name: "emergency-merge"
+  color: "d73a4a"
+  description: "Emergency merge bypass for critical fixes"
+
+- name: "vortex-synchronized"
+  color: "00d4aa"
+  description: "Snap-in achieved - synchronized across vortex"
+
+# === Phase Gate Labels (KENL → AWI → ATOM → SAIF → Spiral) ===
+- name: "phase:KENL"
+  color: "e99695"
+  description: "Knowledge patterns phase"
+
+- name: "phase:AWI"
+  color: "f9d0c4"
+  description: "Intent scaffolding phase"
+
+- name: "phase:ATOM"
+  color: "c2e0c6"
+  description: "Atomic execution phase"
+
+- name: "phase:SAIF"
+  color: "bfdadc"
+  description: "Safe integration phase"
+
+- name: "phase:Spiral"
+  color: "c5def5"
+  description: "Knowledge spiral phase"
+
+# === Component Labels (Monorepo Packages) ===
+- name: "pkg:wave-toolkit"
+  color: "1d76db"
+  description: "Wave analysis & coherence detection"
+
+- name: "pkg:atom-trail"
+  color: "5319e7"
+  description: "ATOM provenance & gate transitions"
+
+- name: "pkg:ax-signatures"
+  color: "0e8a16"
+  description: "Ax/DSPy optimization signatures"
+
+- name: "pkg:quantum-ethics"
+  color: "d93f0b"
+  description: "Quantum ethics framework"
+
+- name: "pkg:mcp-server"
+  color: "fbca04"
+  description: "MCP server application"
+
+# === Issue Types ===
+- name: "bug"
+  color: "d73a4a"
+  description: "Something isn't working"
+
+- name: "enhancement"
+  color: "a2eeef"
+  description: "New feature or request"
+
+- name: "documentation"
+  color: "0075ca"
+  description: "Improvements or additions to documentation"
+
+- name: "security"
+  color: "d93f0b"
+  description: "Security vulnerability or concern"
+
+# === Workflow Status ===
+- name: "coherence:high"
+  color: "0e8a16"
+  description: "Coherence score >70% (meets threshold)"
+
+- name: "coherence:review"
+  color: "fbca04"
+  description: "Coherence score 60-70% (needs review)"
+
+- name: "coherence:low"
+  color: "d73a4a"
+  description: "Coherence score <60% (requires improvement)"
+
+- name: "hub-spoke-sync"
+  color: "7057ff"
+  description: "Synchronization across 6-repo ecosystem"
+
+- name: "breaking-change"
+  color: "b60205"
+  description: "Breaking change requiring major version bump"
+
+# === Priority Labels ===
+- name: "priority:critical"
+  color: "b60205"
+  description: "Critical priority - immediate attention required"
+
+- name: "priority:high"
+  color: "d93f0b"
+  description: "High priority"
+
+- name: "priority:medium"
+  color: "fbca04"
+  description: "Medium priority"
+
+- name: "priority:low"
+  color: "c5def5"
+  description: "Low priority"
