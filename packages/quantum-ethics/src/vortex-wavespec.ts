@@ -1,26 +1,31 @@
 /**
  * VORTEX WAVEspec - Verified Operational Runtime Testing for Ecosystem Xecution
- * 
+ *
  * Integrates with:
  * - Datalore notebooks
  * - Runpod deployments
  * - SpiralSafe/QDI/HOPE API endpoints
  * - Cloudflare edge functions
- * 
+ *
  * Emergent quality target: >60%
  * Fibonacci ratio: 1.618
  */
 
-import { analyzeWave, type WaveAnalysisResult, PHI, FIBONACCI } from '@spiralsafe/wave-toolkit';
-import { createDecision, type AtomDecision } from '@spiralsafe/atom-trail';
+import { type AtomDecision, createDecision } from "@spiralsafe/atom-trail";
+import {
+  analyzeWave,
+  FIBONACCI,
+  PHI,
+  type WaveAnalysisResult,
+} from "@spiralsafe/wave-toolkit";
 
 // VORTEX Marker for cross-system integration
-export const VORTEX_MARKER = 'VORTEX::QDI::v1';
-export const COHERENCE_THRESHOLD = 0.60; // 60% minimum for PASS
+export const VORTEX_MARKER = "VORTEX::QDI::v1";
+export const COHERENCE_THRESHOLD = 0.6; // 60% minimum for PASS
 
 export interface VortexNode {
   name: string;
-  status: 'CLEAN' | 'DIRTY' | 'WARN' | 'ERROR';
+  status: "CLEAN" | "DIRTY" | "WARN" | "ERROR";
   branch: string;
   commit: string;
   changes: { added: number; removed: number };
@@ -28,7 +33,7 @@ export interface VortexNode {
 
 export interface VortexConfig {
   emergentQuality: number; // Target >60%
-  fibonacciRatio: number;  // 1.618
+  fibonacciRatio: number; // 1.618
   nodes: string[];
   endpoints: {
     datalore: boolean;
@@ -82,113 +87,174 @@ export interface VortexRefinement {
 export interface EndpointStatus {
   name: string;
   url: string;
-  status: 'connected' | 'pending' | 'disconnected';
+  status: "connected" | "pending" | "disconnected";
   vortexEnabled: boolean;
 }
 
 const DEFAULT_VORTEX_CONFIG: VortexConfig = {
-  emergentQuality: 0.60,
+  emergentQuality: 0.6,
   fibonacciRatio: PHI,
-  nodes: ['SPIRAL', 'MONO', 'QDI', 'QR', 'HOPE', 'CMCP'],
+  nodes: ["SPIRAL", "MONO", "QDI", "QR", "HOPE", "CMCP"],
   endpoints: {
     datalore: true,
     runpod: true,
     spiralsafe: true,
     qdi: true,
     hope: true,
-    cloudflare: true
-  }
+    cloudflare: true,
+  },
 };
+
+/**
+ * Normalize coherence score from 0-100 scale to 0-1 scale
+ */
+function normalizeCoherenceScore(rawScore: number): number {
+  return rawScore / 100;
+}
 
 /**
  * Create VORTEX dashboard payload for endpoint integration
  */
 export function createVortexPayload(
   analysisText: string,
-  config: Partial<VortexConfig> = {}
+  config: Partial<VortexConfig> = {},
 ): VortexDashboardPayload {
   const cfg = { ...DEFAULT_VORTEX_CONFIG, ...config };
   const waveAnalysis = analyzeWave(analysisText);
-  
+
   const vortexes: VortexCluster[] = [
     {
-      vortex_name: 'MonitoringVortex',
-      description: 'Autonomous monitoring cluster – self-maintains coherence metrics',
-      coherence: waveAnalysis.coherence_score / 100,
-      components: ['CoherenceConstellation.tsx', 'SpectralAnalyzer.tsx', 'SessionMonitor.tsx'],
+      vortex_name: "MonitoringVortex",
+      description:
+        "Autonomous monitoring cluster – self-maintains coherence metrics",
+      coherence: normalizeCoherenceScore(waveAnalysis.coherence_score),
+      components: [
+        "CoherenceConstellation.tsx",
+        "SpectralAnalyzer.tsx",
+        "SessionMonitor.tsx",
+      ],
       refinements: [
         {
-          original: 'CoherenceConstell.tsx',
-          refined: 'CoherenceConstellation.tsx',
-          autonomy: 'useState hook for local metrics, tests via Jest',
-          proof: 'Visuals: Matplotlib plots; Proofreading: DSpy-tuned metrics >60%'
-        }
-      ]
+          original: "CoherenceConstell.tsx",
+          refined: "CoherenceConstellation.tsx",
+          autonomy: "useState hook for local metrics, tests via Jest",
+          proof:
+            "Visuals: Matplotlib plots; Proofreading: DSpy-tuned metrics >60%",
+        },
+      ],
     },
     {
-      vortex_name: 'TestingVortex',
-      description: 'Autonomous testing/compliance – self-maintains audits/proofs',
-      coherence: Math.min(1, waveAnalysis.coherence_score / 100 + 0.05),
-      components: ['LoadTestingSimulator.tsx', 'ComplianceTracker.tsx', 'SortingHat.tsx'],
+      vortex_name: "TestingVortex",
+      description:
+        "Autonomous testing/compliance – self-maintains audits/proofs",
+      coherence: Math.min(
+        1,
+        normalizeCoherenceScore(waveAnalysis.coherence_score) + 0.05,
+      ),
+      components: [
+        "LoadTestingSimulator.tsx",
+        "ComplianceTracker.tsx",
+        "SortingHat.tsx",
+      ],
       refinements: [
         {
-          original: 'LoadTestingSimu.tsx',
-          refined: 'LoadTestingSimulator.tsx',
-          autonomy: 'useEffect for sim runs, Cypress tests',
-          proof: 'Coverage 95%'
-        }
-      ]
+          original: "LoadTestingSimu.tsx",
+          refined: "LoadTestingSimulator.tsx",
+          autonomy: "useEffect for sim runs, Cypress tests",
+          proof: "Coverage 95%",
+        },
+      ],
     },
     {
-      vortex_name: 'PlanningVortex',
-      description: 'Autonomous planning/infra – self-maintains transitions',
-      coherence: Math.min(1, waveAnalysis.coherence_score / 100 + 0.03),
-      components: ['MigrationPlanner.tsx', 'HardwareBridge.tsx', 'TransitionTimeline.tsx'],
+      vortex_name: "PlanningVortex",
+      description: "Autonomous planning/infra – self-maintains transitions",
+      coherence: Math.min(
+        1,
+        normalizeCoherenceScore(waveAnalysis.coherence_score) + 0.03,
+      ),
+      components: [
+        "MigrationPlanner.tsx",
+        "HardwareBridge.tsx",
+        "TransitionTimeline.tsx",
+      ],
       refinements: [
         {
-          original: 'MigrationPlanner.tsx',
-          refined: 'MigrationPlanner.tsx',
-          autonomy: 'Modular reducers, lifecycle phases',
-          proof: 'Bayesian opt via Ax'
-        }
-      ]
+          original: "MigrationPlanner.tsx",
+          refined: "MigrationPlanner.tsx",
+          autonomy: "Modular reducers, lifecycle phases",
+          proof: "Bayesian opt via Ax",
+        },
+      ],
     },
     {
-      vortex_name: 'CoreVortex',
-      description: 'Autonomous core/philo – self-maintains ethics',
-      coherence: Math.min(1, waveAnalysis.coherence_score / 100 + 0.08),
-      components: ['HopeSaucedPhilosophy.tsx', 'StakeholderHub.tsx'],
+      vortex_name: "CoreVortex",
+      description: "Autonomous core/philo – self-maintains ethics",
+      coherence: Math.min(
+        1,
+        normalizeCoherenceScore(waveAnalysis.coherence_score) + 0.08,
+      ),
+      components: ["HopeSaucedPhilosophy.tsx", "StakeholderHub.tsx"],
       refinements: [
         {
-          original: 'HopeSaucedPhilo.tsx',
-          refined: 'HopeSaucedPhilosophy.tsx',
-          autonomy: 'Context providers, ethical tests',
-          proof: 'Coherence >60%'
-        }
-      ]
-    }
+          original: "HopeSaucedPhilo.tsx",
+          refined: "HopeSaucedPhilosophy.tsx",
+          autonomy: "Context providers, ethical tests",
+          proof: "Coherence >60%",
+        },
+      ],
+    },
   ];
 
   const endpoints: EndpointStatus[] = [
-    { name: 'Datalore', url: 'https://datalore.jetbrains.com', status: cfg.endpoints.datalore ? 'connected' : 'pending', vortexEnabled: true },
-    { name: 'Runpod', url: 'https://api.runpod.io', status: cfg.endpoints.runpod ? 'connected' : 'pending', vortexEnabled: true },
-    { name: 'SpiralSafe', url: 'https://spiralsafe.dev', status: cfg.endpoints.spiralsafe ? 'connected' : 'pending', vortexEnabled: true },
-    { name: 'QDI', url: 'https://qdi.spiralsafe.dev', status: cfg.endpoints.qdi ? 'connected' : 'pending', vortexEnabled: true },
-    { name: 'HOPE', url: 'https://hope.spiralsafe.dev', status: cfg.endpoints.hope ? 'connected' : 'pending', vortexEnabled: true },
-    { name: 'Cloudflare', url: 'https://workers.cloudflare.com', status: cfg.endpoints.cloudflare ? 'connected' : 'pending', vortexEnabled: true }
+    {
+      name: "Datalore",
+      url: "https://datalore.jetbrains.com",
+      status: cfg.endpoints.datalore ? "connected" : "pending",
+      vortexEnabled: true,
+    },
+    {
+      name: "Runpod",
+      url: "https://api.runpod.io",
+      status: cfg.endpoints.runpod ? "connected" : "pending",
+      vortexEnabled: true,
+    },
+    {
+      name: "SpiralSafe",
+      url: "https://spiralsafe.dev",
+      status: cfg.endpoints.spiralsafe ? "connected" : "pending",
+      vortexEnabled: true,
+    },
+    {
+      name: "QDI",
+      url: "https://qdi.spiralsafe.dev",
+      status: cfg.endpoints.qdi ? "connected" : "pending",
+      vortexEnabled: true,
+    },
+    {
+      name: "HOPE",
+      url: "https://hope.spiralsafe.dev",
+      status: cfg.endpoints.hope ? "connected" : "pending",
+      vortexEnabled: true,
+    },
+    {
+      name: "Cloudflare",
+      url: "https://workers.cloudflare.com",
+      status: cfg.endpoints.cloudflare ? "connected" : "pending",
+      vortexEnabled: true,
+    },
   ];
 
   return {
-    $schema: 'https://spiralsafe.dev/vortex-dashboard-v1.json',
+    $schema: "https://spiralsafe.dev/vortex-dashboard-v1.json",
     meta: {
-      name: 'VORTEX Dashboard Payload',
-      version: '1.0.0',
+      name: "VORTEX Dashboard Payload",
+      version: "1.0.0",
       emergentQuality: `>${cfg.emergentQuality * 100}%`,
       fibonacciRatio: cfg.fibonacciRatio,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     },
     vortexes,
-    endpoints
+    endpoints,
   };
 }
 
@@ -198,21 +264,21 @@ export function createVortexPayload(
 export function runVortexCheck(
   analysisText: string,
   nodes: VortexNode[] = [],
-  config: Partial<VortexConfig> = {}
+  config: Partial<VortexConfig> = {},
 ): VortexResult {
   const cfg = { ...DEFAULT_VORTEX_CONFIG, ...config };
   const waveAnalysis = analyzeWave(analysisText);
-  
-  const coherenceScore = waveAnalysis.coherence_score / 100;
+
+  const coherenceScore = normalizeCoherenceScore(waveAnalysis.coherence_score);
   const passed = coherenceScore >= cfg.emergentQuality;
-  
+
   const atomDecision = createDecision(
-    'VERIFY',
-    `VORTEX check: ${passed ? 'PASS' : 'FAIL'} at ${(coherenceScore * 100).toFixed(1)}%`,
+    "VERIFY",
+    `VORTEX check: ${passed ? "PASS" : "FAIL"} at ${(coherenceScore * 100).toFixed(1)}%`,
     [],
-    ['vortex', passed ? 'pass' : 'fail', 'coherence']
+    ["vortex", passed ? "pass" : "fail", "coherence"],
   );
-  
+
   return {
     timestamp: new Date().toISOString(),
     coherenceScore,
@@ -221,7 +287,7 @@ export function runVortexCheck(
     nodes,
     waveAnalysis,
     atomDecision,
-    marker: VORTEX_MARKER
+    marker: VORTEX_MARKER,
   };
 }
 
@@ -230,45 +296,60 @@ export function runVortexCheck(
  */
 export function formatVortexReport(result: VortexResult): string {
   const lines: string[] = [];
-  
-  lines.push('VORTEX - Verified Operational Runtime Testing for Ecosystem Xecution');
-  lines.push('======================================================================');
-  lines.push('');
+
+  lines.push(
+    "VORTEX - Verified Operational Runtime Testing for Ecosystem Xecution",
+  );
+  lines.push(
+    "======================================================================",
+  );
+  lines.push("");
   lines.push(`Timestamp: ${result.timestamp}`);
-  lines.push('');
-  lines.push('NODE STATUS:');
-  lines.push('----------------------------------------------------------------------');
-  
+  lines.push("");
+  lines.push("NODE STATUS:");
+  lines.push(
+    "----------------------------------------------------------------------",
+  );
+
   if (result.nodes.length > 0) {
-    lines.push('Name     | Status | Branch       | Commit   | Changes');
-    lines.push('---------|--------|--------------|----------|----------');
+    lines.push("Name     | Status | Branch       | Commit   | Changes");
+    lines.push("---------|--------|--------------|----------|----------");
     for (const node of result.nodes) {
-      lines.push(`${node.name.padEnd(8)} | ${node.status.padEnd(6)} | ${node.branch.padEnd(12)} | ${node.commit.slice(0, 8)} | +${node.changes.added}/-${node.changes.removed}`);
+      lines.push(
+        `${node.name.padEnd(8)} | ${node.status.padEnd(6)} | ${node.branch.padEnd(12)} | ${node.commit.slice(0, 8)} | +${node.changes.added}/-${node.changes.removed}`,
+      );
     }
   } else {
-    lines.push('No nodes configured');
+    lines.push("No nodes configured");
   }
-  
-  lines.push('');
-  lines.push('COHERENCE METRICS:');
-  lines.push('----------------------------------------------------------------------');
+
+  lines.push("");
+  lines.push("COHERENCE METRICS:");
+  lines.push(
+    "----------------------------------------------------------------------",
+  );
   lines.push(`Score: ${result.emergentQuality}`);
   lines.push(`Threshold: ${COHERENCE_THRESHOLD * 100}%`);
-  lines.push(`Status: ${result.passed ? '✅ PASS' : '❌ FAIL'}`);
-  lines.push('');
+  lines.push(`Status: ${result.passed ? "✅ PASS" : "❌ FAIL"}`);
+  lines.push("");
   lines.push(`Marker: ${result.marker}`);
-  lines.push('======================================================================');
-  
-  return lines.join('\n');
+  lines.push(
+    "======================================================================",
+  );
+
+  return lines.join("\n");
 }
 
 /**
  * Calculate Fibonacci-weighted coherence boost
  */
-export function fibonacciCoherenceBoost(baseCoherence: number, iteration: number): number {
+export function fibonacciCoherenceBoost(
+  baseCoherence: number,
+  iteration: number,
+): number {
   const fibIndex = Math.min(iteration, FIBONACCI.length - 1);
   const fibWeight = FIBONACCI[fibIndex] / FIBONACCI[FIBONACCI.length - 1];
-  return Math.min(1, baseCoherence + (fibWeight * 0.1));
+  return Math.min(1, baseCoherence + fibWeight * 0.1);
 }
 
 // Export for use in dashboard and endpoints
