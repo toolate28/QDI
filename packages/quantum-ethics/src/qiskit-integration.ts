@@ -97,7 +97,7 @@ export class QiskitIntegration {
     const pythonScript = this.generatePythonScript(circuit, execConfig);
     
     // Write script to temp file with secure random name
-    const randomId = crypto.randomBytes(16).toString('hex');
+    const randomId = randomBytes(16).toString('hex');
     const scriptPath = join(tmpdir(), `qiskit_${randomId}.py`);
     const outputPath = scriptPath.replace('.py', '_output.json');
     
@@ -223,7 +223,7 @@ output = {
 }
 ` : `
 from qiskit_aer import AerSimulator
-backend = AerSimulator(${config.noise_model !== 'ideal' ? 'noise_model=noise_model' : ''})
+${config.noise_model !== 'ideal' ? 'backend = AerSimulator(noise_model=noise_model)' : 'backend = AerSimulator()'}
 qc.measure_all()
 job = backend.run(qc, shots=${config.shots || 1024})
 result = job.result()

@@ -15,7 +15,7 @@ import { randomBytes } from 'crypto';
  */
 function generateProvenanceId(prefix: string): string {
   const timestamp = Date.now();
-  const randomId = randomBytes(8).toString('hex').slice(0, 9);
+  const randomId = randomBytes(8).toString('hex');
   return `${prefix}_${timestamp}_${randomId}`;
 }
 
