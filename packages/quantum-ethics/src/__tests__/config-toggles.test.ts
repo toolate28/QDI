@@ -5,9 +5,7 @@
 import { describe, test, expect } from 'bun:test';
 import {
   ConfigurationManager,
-  DEFAULT_CONFIG,
   parseConfigFromJSON,
-  createConfigurationManager,
   type QuantumEthicsConfiguration
 } from '../config-toggles';
 
