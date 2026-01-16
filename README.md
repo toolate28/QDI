@@ -111,6 +111,32 @@ KENL → AWI → ATOM → SAIF → Spiral
 - **SAIF**: Safe integration
 - **Spiral**: Back to knowledge
 
+## Coding Agent
+
+The repository includes a GitHub Actions-based coding agent for automated ethical review of PRs.
+
+### Agent Setup
+
+```bash
+# Install Python dependencies for quantum simulations
+pip install qiskit pytest
+
+# Run agent skills locally
+python agent_skills.py simulate
+python agent_skills.py check_coherence --threshold 0.6
+```
+
+### Agent Commands
+
+| Command | Description |
+|---------|-------------|
+| `simulate` | Run Qiskit circuit simulation |
+| `check_coherence` | Verify coherence threshold (>60%) |
+| `cascade` | Integrate provenance for cascading PRs |
+| `review_pr` | Generate automated PR review |
+
+See [docs/instructions.md](docs/instructions.md) for full agent documentation.
+
 ## Feedback & Contributions
 
 We welcome feedback and contributions! Connect with the co-founder:
