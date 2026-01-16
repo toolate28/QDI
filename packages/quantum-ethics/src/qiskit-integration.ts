@@ -298,36 +298,46 @@ except Exception as e:
         reject(new Error('Invalid script filename format'));
         return;
       }
-      
-      const pythonProcess = spawn('python3', [scriptPath, outputPath]);
-      
-      let stdout = '';
-      let stderr = '';
-      
-      pythonProcess.stdout.on('data', (data) => {
-        stdout += data.toString();
-      });
-      
-      pythonProcess.stderr.on('data', (data) => {
-        stderr += data.toString();
-      });
-      
-      pythonProcess.on('close', (code) => {
-        if (code === 0 && stdout.includes('SUCCESS')) {
-          try {
-            const result = readFileSync(outputPath, 'utf-8');
-            resolve(result);
-          } catch (e) {
-            reject(new Error(`Failed to read output: ${e}`));
+
+      const runPython = (pythonExecutable: string) => {
+        const pythonProcess = spawn(pythonExecutable, [scriptPath, outputPath]);
+
+        let stdout = '';
+        let stderr = '';
+
+        pythonProcess.stdout.on('data', (data) => {
+          stdout += data.toString();
+        });
+
+        pythonProcess.stderr.on('data', (data) => {
+          stderr += data.toString();
+        });
+
+        pythonProcess.on('close', (code) => {
+          if (code === 0 && stdout.includes('SUCCESS')) {
+            try {
+              const result = readFileSync(outputPath, 'utf-8');
+              resolve(result);
+            } catch (e) {
+              reject(new Error(`Failed to read output: ${e}`));
+            }
+          } else {
+            reject(new Error(`Qiskit execution failed: ${stderr || stdout}`));
           }
-        } else {
-          reject(new Error(`Qiskit execution failed: ${stderr || stdout}`));
-        }
-      });
-      
-      pythonProcess.on('error', (error) => {
-        reject(new Error(`Failed to start Python process: ${error.message}`));
-      });
+        });
+
+        pythonProcess.on('error', (error: any) => {
+          // If python3 is not found, try falling back to "python"
+          if (error && error.code === 'ENOENT' && pythonExecutable === 'python3') {
+            runPython('python');
+            return;
+          }
+          reject(new Error(`Failed to start Python process (${pythonExecutable}): ${error.message}`));
+        });
+      };
+
+      // Prefer python3, fall back to python if not available
+      runPython('python3');
     });
   }
 }
