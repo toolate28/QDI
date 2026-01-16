@@ -1,0 +1,23 @@
+# GitHub Labels Configuration
+# This file defines all labels used in the repository
+# Labels are automatically synced via the label-sync workflow
+
+- name: "dependencies"
+  color: "0366d6"
+  description: "Pull requests that update a dependency file"
+
+- name: "ATOM-maintenance"
+  color: "d4c5f9"
+  description: "ATOM provenance tracking and maintenance tasks"
+
+- name: "actions"
+  color: "000000"
+  description: "GitHub Actions workflow updates"
+
+- name: "spiral-preservation"
+  color: "fbca04"
+  description: "Spiral coherence preservation updates"
+
+- name: "vortex-wave"
+  color: "7057ff"
+  description: "Vortex wave tracking across nodes"
