@@ -161,7 +161,7 @@ function checkTypeScriptConfig(): boolean {
  */
 async function runTests(): Promise<boolean> {
   try {
-    await $`cd ${ROOT_DIR} && bun test`.quiet();
+    await $({ cwd: ROOT_DIR })`bun test`.quiet();
     return true;
   } catch {
     return false;
