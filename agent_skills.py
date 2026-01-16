@@ -73,6 +73,9 @@ def simulate_circuit(circuit_str: Optional[str] = None) -> dict:
         dict with simulation results including VORTEX marker
     """
     try:
+        # Local imports keep qiskit/qiskit_aer as optional dependencies and
+        # avoid import-time failures when these libraries are not installed.
+        # The ImportError handler below provides a graceful fallback.
         from qiskit import QuantumCircuit
         from qiskit_aer import Aer
         
