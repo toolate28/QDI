@@ -15,6 +15,9 @@ export * from './quantum-simulator';
 export * from './framework';
 export * from './coherence-dashboard';
 export * from './feedback-pipeline';
+export * from './qiskit-integration';
+export * from './provenance-tracking';
+export * from './config-toggles';
 
 // UI Components (React)
 export { QuantumEthicsDashboard } from './dashboard-ui';
