@@ -75,7 +75,6 @@ const executionTimeMs = 42;
 const circuitProvenance = provenanceTracker.trackCircuitExecution('user-123', circuit, {
   backend: 'mock_simulator',  // This is a mock - not calling real Qiskit
   executionTimeMs,
-  executionTimeMs,
   coherenceScore: 85,
   parameters: {
     shots: 1024,
