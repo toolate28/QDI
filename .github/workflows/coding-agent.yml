@@ -25,7 +25,7 @@ jobs:
       - name: Install Dependencies
         run: pip install qiskit
 
-      - name: Run Ethical Sims
+      - name: Simulate Default Bell State Circuit
         id: simulate
         run: |
           if [ -f agent_skills.py ]; then
