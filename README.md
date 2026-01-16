@@ -89,12 +89,12 @@ SAIF loops back to KENL creating infinite improvement
 
 **3. Wave Analysis (Physics)**
 
-| Metric | What It Detects | Optimal
-|--------|-----------------|--------
-| Curl | Circular reasoning | <0.3
-| Divergence | Expansion rate | ~0.2 (golden ratio)
-| Potential | Structure depth | >0.6
-| Entropy | Information density | >0.5
+| Metric     | What It Detects     | Optimal
+|------------|---------------------|------------------------
+| Curl       | Circular reasoning  | <0.3
+| Divergence | Expansion rate      | ~0.2 (golden ratio)
+| Potential  | Structure depth     | >0.6
+| Entropy    | Information density | >0.5
 
 Combine them → **Coherence score 0-100** → Quality emerges
 
@@ -123,11 +123,11 @@ When coherence hits 70%, the **waveform collapses**:
 
 Four tools that work together:
 
-| Package | What It Does
-|---------|-------------
-| **wave-toolkit** | Analyzes text coherence using physics (curl, divergence, potential, entropy)
-| **atom-trail** | Tracks every decision through phase gates (KENL → AWI → ATOM → SAIF → Spiral)
-| **ax-signatures** | Optimizes LLM prompts for coherence
+| Package            | What It Does
+|--------------------|-------------------------------------------------------------------------------
+| **wave-toolkit**   | Analyzes text coherence using physics (curl, divergence, potential, entropy)
+| **atom-trail**     | Tracks every decision through phase gates (KENL → AWI → ATOM → SAIF → Spiral)
+| **ax-signatures**  | Optimizes LLM prompts for coherence
 | **quantum-ethics** | Ethical quantum computing with resource fairness
 
 Quick example:

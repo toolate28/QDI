@@ -55,6 +55,9 @@ __pycache__/
 
 # Finder (MacOS) folder config
 .DS_Store
+
+# ATOM trail local state
+.atom-trail
 *.swp
 *.swo
 
