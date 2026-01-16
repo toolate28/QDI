@@ -111,7 +111,7 @@ console.log('  Note: Requires Python3 and qiskit installation\n');
 
 // 6. Resource Allocation with Provenance
 console.log('--- Resource Allocation ---');
-const { allocation, decision, waveAnalysis } = framework.requestResources(
+const { allocation, waveAnalysis } = framework.requestResources(
   'user-123',
   {
     qubits: 10,
