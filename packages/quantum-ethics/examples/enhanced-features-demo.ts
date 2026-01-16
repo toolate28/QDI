@@ -69,7 +69,6 @@ console.log(`  Gates: ${circuit.gates.length}`);
 console.log(`  Depth: ${circuit.depth}\n`);
 
 // Track circuit execution with provenance
-const startTime = Date.now();
 // Simulate execution (in real scenario, would use actual backend)
 const executionTimeMs = 42;
 
