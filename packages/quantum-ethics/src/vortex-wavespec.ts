@@ -272,10 +272,4 @@ export function fibonacciCoherenceBoost(baseCoherence: number, iteration: number
 }
 
 // Export for use in dashboard and endpoints
-export {
-  VORTEX_MARKER as default,
-  VortexNode,
-  VortexConfig,
-  VortexResult,
-  VortexDashboardPayload
-};
+export default VORTEX_MARKER;
