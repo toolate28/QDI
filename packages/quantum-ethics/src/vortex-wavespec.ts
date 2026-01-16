@@ -20,12 +20,12 @@ export const COHERENCE_THRESHOLD = 0.60; // 60% minimum for PASS
 
 /**
  * Coherence boost constants for different vortex types
- * Values are derived from Fibonacci sequence ratios to maintain
- * mathematical harmony with the emergent quality framework
+ * These values maintain mathematical harmony with the emergent quality framework
+ * and are indexed according to their importance using Fibonacci indices
  */
-export const COHERENCE_BOOST_MONITORING = 0; // Base monitoring - no boost
-export const COHERENCE_BOOST_TESTING = 0.05; // Testing vortex - Fibonacci index 5
-export const COHERENCE_BOOST_PLANNING = 0.03; // Planning vortex - Fibonacci index 3  
+export const COHERENCE_BOOST_MONITORING = 0; // Base monitoring - no boost (index 0)
+export const COHERENCE_BOOST_TESTING = 0.05; // Testing vortex - moderate boost (index 5)
+export const COHERENCE_BOOST_PLANNING = 0.03; // Planning vortex - small boost (index 3)
 export const COHERENCE_BOOST_CORE = 0.08; // Core vortex - highest boost for ethical/philosophical core
 
 export interface VortexNode {
