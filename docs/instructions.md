@@ -15,7 +15,7 @@ Emergent quality is maintained at >60% via isomorphic Fibonacci patterns:
    bun install
    
    # For Python quantum simulations
-   pip install qiskit pytest
+   pip install qiskit
    ```
 
 2. **Configure**: Set `GITHUB_TOKEN` in environment for Actions.
@@ -43,18 +43,17 @@ python agent_skills.py cascade --pr-body "integrate provenance"
 Low resistance: History is dealt-with (tests passing).
 
 ### Ethical Toggles
-- `--equitable`: Apply access metrics for fairness
-- `--provenance`: Enable ATOM trail tracking
+
+Ethical and provenance-aware behavior (e.g., fairness metrics and ATOM trail tracking) is handled by the cascade command and the VORTEX marker system. Use the `cascade` command with PR body text to detect ethical keywords automatically.
 
 ## Commands (Fibonacci Escalation)
 
 | Command | Description |
 |---------|-------------|
-| `simulate` | Run Qiskit circuit simulation, output statevector |
+| `simulate` | Run Qiskit circuit simulation, output measurement counts |
 | `check_coherence` | Measure coherence >60%, negate decoherence |
 | `review_pr` | Parse PR body, auto-generate review comments |
 | `cascade` | Integrate provenance with cascading PRs |
-| `iterate_spiral` | Backtrace history, forward expand (e.g., `--layer 2`) |
 
 ## Maintenance Loops
 

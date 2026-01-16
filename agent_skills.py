@@ -5,6 +5,11 @@ QDI Agent Skills
 Core agent script for quantum circuit simulation and coherence checking.
 Provides commands for GitHub Actions and IDE integrations.
 
+VORTEX markers are embedded for integration with:
+- Datalore notebooks
+- Runpod deployments  
+- SpiralSafe/QDI/HOPE API endpoints
+
 Usage:
     python agent_skills.py simulate [--circuit CIRCUIT]
     python agent_skills.py check_coherence [--threshold THRESHOLD]
@@ -14,11 +19,47 @@ Usage:
 
 import argparse
 import sys
-from typing import Optional
+from typing import Optional, Tuple
 
 # Default simulated coherence for well-prepared quantum states
 # In production, this would be measured via state tomography
 DEFAULT_SIMULATED_COHERENCE = 0.85
+
+# VORTEX marker for endpoint integration
+VORTEX_MARKER = "VORTEX::QDI::v1"
+
+
+def _parse_gate(raw_gate: str) -> Optional[Tuple[str, Tuple]]:
+    """
+    Parse a single gate specification.
+    
+    Args:
+        raw_gate: Gate string like 'h(0)' or 'cx(0,1)'
+        
+    Returns:
+        Tuple (gate_type, qubits) or None for invalid/empty input
+    """
+    gate = raw_gate.strip().lower()
+    if not gate:
+        return None
+    
+    try:
+        if gate.startswith('h(') and gate.endswith(')'):
+            qubit = int(gate[2:-1])
+            return ('h', (qubit,))
+        elif gate.startswith('x(') and gate.endswith(')'):
+            qubit = int(gate[2:-1])
+            return ('x', (qubit,))
+        elif gate.startswith('cx(') and gate.endswith(')'):
+            params = gate[3:-1].split(',')
+            if len(params) != 2:
+                return None
+            control, target = int(params[0].strip()), int(params[1].strip())
+            return ('cx', (control, target))
+    except (ValueError, IndexError):
+        return None
+    
+    return None
 
 
 def simulate_circuit(circuit_str: Optional[str] = None) -> dict:
@@ -29,7 +70,7 @@ def simulate_circuit(circuit_str: Optional[str] = None) -> dict:
         circuit_str: OpenQASM circuit string or gate sequence
         
     Returns:
-        dict with simulation results
+        dict with simulation results including VORTEX marker
     """
     try:
         from qiskit import QuantumCircuit
@@ -39,30 +80,41 @@ def simulate_circuit(circuit_str: Optional[str] = None) -> dict:
             # Parse simple gate sequence like "h(0); cx(0,1)"
             # First pass: determine number of qubits needed
             max_qubit = 1
-            for gate in circuit_str.split(';'):
-                gate = gate.strip().lower()
-                if gate.startswith('h(') or gate.startswith('x('):
-                    qubit = int(gate[2:-1])
-                    max_qubit = max(max_qubit, qubit + 1)
-                elif gate.startswith('cx('):
-                    params = gate[3:-1].split(',')
-                    control, target = int(params[0]), int(params[1])
-                    max_qubit = max(max_qubit, control + 1, target + 1)
+            parsed_gates = []
+            
+            for raw_gate in circuit_str.split(';'):
+                parsed = _parse_gate(raw_gate)
+                if parsed is None:
+                    if raw_gate.strip():  # Non-empty but invalid
+                        return {
+                            'status': 'error',
+                            'error': f"Invalid gate syntax: '{raw_gate.strip()}'",
+                            'vortex': VORTEX_MARKER
+                        }
+                    continue
+                
+                gate_type, qubits = parsed
+                parsed_gates.append(parsed)
+                
+                if gate_type in ('h', 'x'):
+                    max_qubit = max(max_qubit, qubits[0] + 1)
+                elif gate_type == 'cx':
+                    max_qubit = max(max_qubit, qubits[0] + 1, qubits[1] + 1)
             
             num_qubits = max(2, max_qubit)  # Minimum 2 qubits for Bell state
             qc = QuantumCircuit(num_qubits, num_qubits)
-            for gate in circuit_str.split(';'):
-                gate = gate.strip().lower()
-                if gate.startswith('h('):
-                    qubit = int(gate[2:-1])
-                    qc.h(qubit)
-                elif gate.startswith('x('):
-                    qubit = int(gate[2:-1])
-                    qc.x(qubit)
-                elif gate.startswith('cx('):
-                    params = gate[3:-1].split(',')
-                    control, target = int(params[0]), int(params[1])
-                    qc.cx(control, target)
+            
+            # Apply gates
+            for gate_type, qubits in parsed_gates:
+                if gate_type == 'h':
+                    qc.h(qubits[0])
+                elif gate_type == 'x':
+                    qc.x(qubits[0])
+                elif gate_type == 'cx':
+                    qc.cx(qubits[0], qubits[1])
+            
+            # Add measurements for custom circuits
+            qc.measure(list(range(num_qubits)), list(range(num_qubits)))
         else:
             # Default Bell state circuit
             qc = QuantumCircuit(2, 2)
@@ -82,7 +134,8 @@ def simulate_circuit(circuit_str: Optional[str] = None) -> dict:
             'status': 'success',
             'counts': counts,
             'circuit_depth': qc.depth(),
-            'num_qubits': qc.num_qubits
+            'num_qubits': qc.num_qubits,
+            'vortex': VORTEX_MARKER
         }
         
     except ImportError:
@@ -93,7 +146,15 @@ def simulate_circuit(circuit_str: Optional[str] = None) -> dict:
             'counts': {'00': 512, '11': 512},
             'circuit_depth': 2,
             'num_qubits': 2,
-            'note': 'Classical simulation (Qiskit not installed)'
+            'note': 'Classical simulation (Qiskit not installed)',
+            'vortex': VORTEX_MARKER
+        }
+    except Exception as e:
+        # Handle Qiskit execution errors
+        return {
+            'status': 'error',
+            'error': str(e),
+            'vortex': VORTEX_MARKER
         }
 
 
@@ -105,7 +166,7 @@ def check_coherence(threshold: float = 0.6) -> dict:
         threshold: Minimum coherence value (0-1)
         
     Returns:
-        dict with coherence check results
+        dict with coherence check results including VORTEX marker
     """
     # Simulate coherence measurement
     # In production, this would use actual quantum state tomography
@@ -117,7 +178,8 @@ def check_coherence(threshold: float = 0.6) -> dict:
         'coherence': simulated_coherence,
         'threshold': threshold,
         'passed': passed,
-        'message': f"Coherence {simulated_coherence:.2%} {'≥' if passed else '<'} {threshold:.0%} threshold"
+        'message': f"Coherence {simulated_coherence:.2%} {'≥' if passed else '<'} {threshold:.0%} threshold",
+        'vortex': VORTEX_MARKER
     }
 
 
@@ -129,9 +191,9 @@ def cascade_integration(pr_body: Optional[str] = None) -> dict:
         pr_body: Pull request body text
         
     Returns:
-        dict with cascade results
+        dict with cascade results including VORTEX marker
     """
-    keywords = ['provenance', 'ethical', 'quantum', 'coherence', 'atom']
+    keywords = ['provenance', 'ethical', 'quantum', 'coherence', 'atom', 'vortex', 'spiral']
     found = []
     
     if pr_body:
@@ -142,7 +204,8 @@ def cascade_integration(pr_body: Optional[str] = None) -> dict:
         'status': 'cascaded',
         'keywords_found': found,
         'provenance_tracked': True,
-        'message': f"Cascade complete. Found {len(found)} ethical keywords."
+        'message': f"Cascade complete. Found {len(found)} ethical keywords.",
+        'vortex': VORTEX_MARKER
     }
 
 
@@ -151,13 +214,14 @@ def review_pr() -> dict:
     Generate PR review comments.
     
     Returns:
-        dict with review results
+        dict with review results including VORTEX marker
     """
     return {
         'status': 'reviewed',
         'coherence_check': 'passed',
         'ethical_review': 'approved',
-        'message': '🌀 Agent Review: Coherence >60%. Ready for merge.'
+        'message': '🌀 Agent Review: Coherence >60%. Ready for merge.',
+        'vortex': VORTEX_MARKER
     }
 
 
