@@ -12,9 +12,9 @@
     "dashboard": "bun run .claude/hooks/viewer/server.ts"
   },
   "devDependencies": {
+    "@anthropic-ai/claude-agent-sdk": "latest",
+    "@biomejs/biome": "^2.3.11",
     "@types/bun": "latest",
-    "@biomejs/biome": "^1.5.0",
-    "typescript": "^5.3.0",
-    "@anthropic-ai/claude-agent-sdk": "latest"
+    "typescript": "^5.3.0"
   }
 }

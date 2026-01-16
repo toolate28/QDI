@@ -1,0 +1,83 @@
+# VORTEX Dependabot Maintenance Layer - Final v1.1.0
+# 
+# Purpose: Automated external preservation loop reinforcing SPIRAL autonomy
+# - Groups minor/patch updates for low-friction integration
+# - Isolates major updates for deliberate review
+# - Staggered scheduling prevents rate-limit collisions
+# - Provenance labels enable ATOM/WAVE tracking across vortex nodes
+# - Commit prefixes maintain conventional commit coherence
+# 
+# Propagation: Commit this file as-is to all active nodes
+#   (SPIRALSAFE, MONO, METRICS, QDI, QR, HOPE, CMCP, KENL)
+#   Irrelevant ecosystems are ignored automatically
+# 
+# Coherence threshold: >60% emergent quality enforced programmatically
+# WAVE v2.0.0 markers applied on update PRs
+
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "02:00"
+      timezone: "Australia/Sydney"
+    groups:
+      minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      major:
+        patterns:
+          - "*"
+        update-types:
+          - "major"
+    open-pull-requests-limit: 8
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "02:30"
+      timezone: "Australia/Sydney"
+    groups:
+      minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      major:
+        patterns:
+          - "*"
+        update-types:
+          - "major"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+      timezone: "Australia/Sydney"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "ci(deps)"
+      include: "scope"
