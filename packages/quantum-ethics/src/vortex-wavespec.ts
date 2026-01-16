@@ -115,6 +115,27 @@ function normalizeCoherenceScore(rawScore: number): number {
 }
 
 /**
+ * Vortex criticality levels determine coherence boost based on system importance.
+ * Higher criticality = greater coherence boost to ensure stability of critical subsystems.
+ */
+enum VortexCriticality {
+  MONITORING = 0, // Baseline - observational role, no boost needed
+  PLANNING = 3, // Infrastructure planning requires moderate stability
+  TESTING = 5, // Testing/compliance needs high reliability for audit integrity
+  CORE = 8, // Core ethics/philosophy requires maximum coherence for system integrity
+}
+
+/**
+ * Calculate coherence boost based on vortex criticality level.
+ * Formula: boost = criticality / 100
+ * This ensures critical vortexes maintain higher coherence thresholds
+ * while staying within the 0-1 normalized range.
+ */
+function calculateCoherenceBoost(criticality: VortexCriticality): number {
+  return criticality / 100;
+}
+
+/**
  * Create VORTEX dashboard payload for endpoint integration
  */
 export function createVortexPayload(
@@ -124,12 +145,17 @@ export function createVortexPayload(
   const cfg = { ...DEFAULT_VORTEX_CONFIG, ...config };
   const waveAnalysis = analyzeWave(analysisText);
 
+  const baseCoherence = normalizeCoherenceScore(waveAnalysis.coherence_score);
+
   const vortexes: VortexCluster[] = [
     {
       vortex_name: "MonitoringVortex",
       description:
         "Autonomous monitoring cluster – self-maintains coherence metrics",
-      coherence: normalizeCoherenceScore(waveAnalysis.coherence_score),
+      coherence: Math.min(
+        1,
+        baseCoherence + calculateCoherenceBoost(VortexCriticality.MONITORING),
+      ),
       components: [
         "CoherenceConstellation.tsx",
         "SpectralAnalyzer.tsx",
@@ -151,7 +177,7 @@ export function createVortexPayload(
         "Autonomous testing/compliance – self-maintains audits/proofs",
       coherence: Math.min(
         1,
-        normalizeCoherenceScore(waveAnalysis.coherence_score) + 0.05,
+        baseCoherence + calculateCoherenceBoost(VortexCriticality.TESTING),
       ),
       components: [
         "LoadTestingSimulator.tsx",
@@ -172,7 +198,7 @@ export function createVortexPayload(
       description: "Autonomous planning/infra – self-maintains transitions",
       coherence: Math.min(
         1,
-        normalizeCoherenceScore(waveAnalysis.coherence_score) + 0.03,
+        baseCoherence + calculateCoherenceBoost(VortexCriticality.PLANNING),
       ),
       components: [
         "MigrationPlanner.tsx",
@@ -193,7 +219,7 @@ export function createVortexPayload(
       description: "Autonomous core/philo – self-maintains ethics",
       coherence: Math.min(
         1,
-        normalizeCoherenceScore(waveAnalysis.coherence_score) + 0.08,
+        baseCoherence + calculateCoherenceBoost(VortexCriticality.CORE),
       ),
       components: ["HopeSaucedPhilosophy.tsx", "StakeholderHub.tsx"],
       refinements: [
