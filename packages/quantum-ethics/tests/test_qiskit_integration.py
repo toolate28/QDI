@@ -5,7 +5,6 @@ Tests quantum circuit execution with Qiskit backend,
 performance benchmarking, and provenance tracking.
 """
 
-import json
 import pytest
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 from qiskit.qasm3 import dumps
