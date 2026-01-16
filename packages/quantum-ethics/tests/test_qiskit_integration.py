@@ -34,7 +34,7 @@ class TestQiskitBasics:
         counts = result.get_counts()
         
         # Bell state should measure 00 or 11
-        # Note: Qiskit returns counts with space-separated classical and quantum bits
+        # Note: When using measure_all(), some Qiskit versions format count keys with spaces between registers
         count_keys = list(counts.keys())
         assert any('00' in key or '11' in key for key in count_keys)
         assert len(counts) <= 2  # Only two outcomes possible
