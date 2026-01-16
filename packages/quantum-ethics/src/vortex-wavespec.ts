@@ -107,9 +107,11 @@ const DEFAULT_VORTEX_CONFIG: VortexConfig = {
 
 /**
  * Normalize coherence score from 0-100 scale to 0-1 scale
+ * @param rawScore - The coherence score in 0-100 range
+ * @return Normalized score in 0-1 range, clamped to valid bounds
  */
 function normalizeCoherenceScore(rawScore: number): number {
-  return rawScore / 100;
+  return Math.max(0, Math.min(1, rawScore / 100));
 }
 
 /**
