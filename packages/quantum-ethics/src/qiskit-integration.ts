@@ -8,7 +8,8 @@
 import { spawn } from 'child_process';
 import { writeFileSync, unlinkSync, readFileSync } from 'fs';
 import { tmpdir } from 'os';
-import { join } from 'path';
+import { join, basename, dirname } from 'path';
+import { randomBytes } from 'crypto';
 import type { QuantumCircuit, QuantumGate, MeasurementResult } from './quantum-simulator';
 
 export interface QiskitBackendConfig {
@@ -55,6 +56,22 @@ export const DEFAULT_QISKIT_CONFIG: QiskitBackendConfig = {
 };
 
 /**
+ * Get noise level value for noise model
+ */
+function getNoiseLevel(noiseModel: string): string {
+  switch (noiseModel) {
+    case 'high':
+      return '0.05';
+    case 'medium':
+      return '0.02';
+    case 'low':
+      return '0.005';
+    default:
+      return '0.005';
+  }
+}
+
+/**
  * Qiskit Integration Class
  * Executes quantum circuits using real Qiskit backend
  */
@@ -79,8 +96,9 @@ export class QiskitIntegration {
     // Generate Python script for Qiskit execution
     const pythonScript = this.generatePythonScript(circuit, execConfig);
     
-    // Write script to temp file
-    const scriptPath = join(tmpdir(), `qiskit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.py`);
+    // Write script to temp file with secure random name
+    const randomId = crypto.randomBytes(16).toString('hex');
+    const scriptPath = join(tmpdir(), `qiskit_${randomId}.py`);
     const outputPath = scriptPath.replace('.py', '_output.json');
     
     writeFileSync(scriptPath, pythonScript);
@@ -185,7 +203,7 @@ from qiskit_aer.noise import NoiseModel, depolarizing_error
 
 # Create noise model
 noise_model = NoiseModel()
-noise_level = ${config.noise_model === 'high' ? '0.05' : config.noise_model === 'medium' ? '0.02' : '0.005'}
+noise_level = ${getNoiseLevel(config.noise_model)}
 error = depolarizing_error(noise_level, 1)
 noise_model.add_all_qubit_quantum_error(error, ['h', 'x', 'y', 'z', 'rx', 'ry', 'rz'])
 error_2q = depolarizing_error(noise_level * 2, 2)
@@ -260,6 +278,21 @@ except Exception as e:
    */
   private executePython(scriptPath: string, outputPath: string): Promise<string> {
     return new Promise((resolve, reject) => {
+      // Validate script path is in tmpdir
+      const tmpPath = tmpdir();
+      const scriptDir = dirname(scriptPath);
+      if (scriptDir !== tmpPath) {
+        reject(new Error('Script path must be in temporary directory'));
+        return;
+      }
+      
+      // Validate file name format
+      const fileName = basename(scriptPath);
+      if (!fileName.startsWith('qiskit_') || !fileName.endsWith('.py')) {
+        reject(new Error('Invalid script filename format'));
+        return;
+      }
+      
       const pythonProcess = spawn('python3', [scriptPath, outputPath]);
       
       let stdout = '';

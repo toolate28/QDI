@@ -8,6 +8,16 @@
 import { createDecision, createTrailEntry, type AtomDecision, type TrailEntry } from '@spiralsafe/atom-trail';
 import type { QuantumCircuit, QuantumGate, MeasurementResult } from './quantum-simulator';
 import type { WaveAnalysisResult } from '@spiralsafe/wave-toolkit';
+import { randomBytes } from 'crypto';
+
+/**
+ * Generate secure random ID
+ */
+function generateProvenanceId(prefix: string): string {
+  const timestamp = Date.now();
+  const randomId = randomBytes(8).toString('hex').slice(0, 9);
+  return `${prefix}_${timestamp}_${randomId}`;
+}
 
 export interface ProvenanceMetadata {
   timestamp: string;
@@ -98,7 +108,7 @@ export class ProvenanceTracker {
       parameters?: Record<string, any>;
     }
   ): CircuitProvenance {
-    const provenanceId = `prov_circuit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const provenanceId = generateProvenanceId('prov_circuit');
     const executionId = `exec_${Date.now()}`;
     
     // Create ATOM decision for circuit execution
@@ -170,7 +180,7 @@ export class ProvenanceTracker {
       reason?: string;
     }
   ): ResourceProvenance {
-    const provenanceId = `prov_resource_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const provenanceId = generateProvenanceId('prov_resource');
     
     // Create ATOM decision for resource allocation
     const decision = createDecision(

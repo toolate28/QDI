@@ -334,9 +334,24 @@ export class ConfigurationManager {
    * Validate configuration
    */
   private validateConfig(config: QuantumEthicsConfiguration): void {
-    const validation = this.validateConfiguration();
-    if (!validation.valid) {
-      throw new Error(`Invalid configuration: ${validation.errors.join(', ')}`);
+    const errors: string[] = [];
+
+    // Validate coherence baseline
+    if (config.filters.coherenceBaseline < 0.5) {
+      errors.push(`Coherence baseline ${config.filters.coherenceBaseline} is too low (minimum 0.5)`);
+    }
+    if (config.filters.coherenceBaseline > 1.0) {
+      errors.push(`Coherence baseline ${config.filters.coherenceBaseline} exceeds maximum 1.0`);
+    }
+
+    // Validate noise scrub
+    const validNoiseLevels = ['low', 'medium', 'high'];
+    if (!validNoiseLevels.includes(config.filters.noiseScrub)) {
+      errors.push(`Invalid noise scrub level: ${config.filters.noiseScrub}`);
+    }
+
+    if (errors.length > 0) {
+      throw new Error(`Invalid configuration: ${errors.join(', ')}`);
     }
   }
 
