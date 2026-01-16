@@ -369,9 +369,9 @@ export function formatVortexReport(result: VortexResult): string {
 }
 
 /**
- * Calculate Fibonacci-weighted coherence boost
+ * Apply Fibonacci-weighted boost to coherence score
  */
-export function fibonacciCoherenceBoost(
+export function applyFibonacciWeightedBoost(
   baseCoherence: number,
   iteration: number,
 ): number {
