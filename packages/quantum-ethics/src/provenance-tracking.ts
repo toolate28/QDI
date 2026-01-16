@@ -5,7 +5,7 @@
  * resource allocation, and ethical compliance history.
  */
 
-import { createDecision, createTrailEntry, type AtomDecision, type TrailEntry } from '@spiralsafe/atom-trail';
+import { createDecision, type AtomDecision, type TrailEntry } from '@spiralsafe/atom-trail';
 import type { QuantumCircuit, QuantumGate, MeasurementResult } from './quantum-simulator';
 import type { WaveAnalysisResult } from '@spiralsafe/wave-toolkit';
 import { randomBytes } from 'crypto';
