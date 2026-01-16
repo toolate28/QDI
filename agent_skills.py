@@ -16,6 +16,10 @@ import argparse
 import sys
 from typing import Optional
 
+# Default simulated coherence for well-prepared quantum states
+# In production, this would be measured via state tomography
+DEFAULT_SIMULATED_COHERENCE = 0.85
+
 
 def simulate_circuit(circuit_str: Optional[str] = None) -> dict:
     """
@@ -33,7 +37,20 @@ def simulate_circuit(circuit_str: Optional[str] = None) -> dict:
         
         if circuit_str:
             # Parse simple gate sequence like "h(0); cx(0,1)"
-            qc = QuantumCircuit(2, 2)
+            # First pass: determine number of qubits needed
+            max_qubit = 1
+            for gate in circuit_str.split(';'):
+                gate = gate.strip().lower()
+                if gate.startswith('h(') or gate.startswith('x('):
+                    qubit = int(gate[2:-1])
+                    max_qubit = max(max_qubit, qubit + 1)
+                elif gate.startswith('cx('):
+                    params = gate[3:-1].split(',')
+                    control, target = int(params[0]), int(params[1])
+                    max_qubit = max(max_qubit, control + 1, target + 1)
+            
+            num_qubits = max(2, max_qubit)  # Minimum 2 qubits for Bell state
+            qc = QuantumCircuit(num_qubits, num_qubits)
             for gate in circuit_str.split(';'):
                 gate = gate.strip().lower()
                 if gate.startswith('h('):
@@ -92,7 +109,7 @@ def check_coherence(threshold: float = 0.6) -> dict:
     """
     # Simulate coherence measurement
     # In production, this would use actual quantum state tomography
-    simulated_coherence = 0.85  # Typical coherence for well-prepared states
+    simulated_coherence = DEFAULT_SIMULATED_COHERENCE
     
     passed = simulated_coherence >= threshold
     
@@ -168,11 +185,11 @@ def main():
     args = parser.parse_args()
     
     if args.command == 'simulate':
-        result = simulate_circuit(args.circuit if hasattr(args, 'circuit') else None)
+        result = simulate_circuit(getattr(args, 'circuit', None))
     elif args.command == 'check_coherence':
-        result = check_coherence(args.threshold if hasattr(args, 'threshold') else 0.6)
+        result = check_coherence(getattr(args, 'threshold', 0.6))
     elif args.command == 'cascade':
-        result = cascade_integration(args.pr_body if hasattr(args, 'pr_body') else None)
+        result = cascade_integration(getattr(args, 'pr_body', None))
     elif args.command == 'review_pr':
         result = review_pr()
     else:
