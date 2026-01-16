@@ -56,7 +56,12 @@ class TestQiskitBasics:
         count_keys = list(counts.keys())
         assert any('0' in key for key in count_keys) and any('1' in key for key in count_keys)
         # Allow for statistical variation (30% to 70%)
-        total_0 = sum(v for k, v in counts.items() if k.startswith('0'))
+        total_0 = sum(
+            v
+            for k, v in counts.items()
+            for bitstring in [k.replace(" ", "")]
+            if bitstring.endswith("0")
+        )
         assert 300 < total_0 < 700
     
     def test_statevector_simulation(self):
