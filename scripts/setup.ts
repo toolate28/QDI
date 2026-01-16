@@ -310,6 +310,7 @@ async function setup(options: SetupOptions): Promise<SetupResult> {
       log("success", "Test suite passing");
     } else {
       log("warn", "Some tests may be failing (check output)");
+      result.success = false;
     }
   }
 
