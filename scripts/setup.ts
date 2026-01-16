@@ -15,7 +15,7 @@
 import { $ } from "bun";
 import { existsSync, rmSync } from "fs";
 import { mkdir, writeFile } from "fs/promises";
-import { join, resolve, sep } from "path";
+import { join, resolve } from "path";
 
 const ROOT_DIR = join(import.meta.dir, "..");
 const ATOM_TRAIL_DIR = join(ROOT_DIR, ".atom-trail");
@@ -105,14 +105,13 @@ async function installDependencies(force: boolean): Promise<boolean> {
       // Ensure the resolved path is within the project directory
       const resolvedNodeModules = resolve(nodeModulesPath);
       const resolvedRoot = resolve(ROOT_DIR);
+      const expectedPath = resolve(resolvedRoot, "node_modules");
       
-      // Check that the path is within the project directory
-      // and specifically points to the node_modules folder
-      const isWithinProject = 
-        resolvedNodeModules.startsWith(resolvedRoot + sep) &&
-        resolvedNodeModules === join(resolvedRoot, "node_modules");
+      // Check that the resolved path exactly matches the expected node_modules path
+      // This prevents path traversal attacks (e.g., /etc/node_modules)
+      const isValidPath = resolvedNodeModules === expectedPath;
       
-      if (existsSync(nodeModulesPath) && isWithinProject) {
+      if (existsSync(nodeModulesPath) && isValidPath) {
         rmSync(nodeModulesPath, { recursive: true, force: true });
       }
       await $`cd ${ROOT_DIR} && bun install`.quiet();
