@@ -20,13 +20,13 @@ export const COHERENCE_THRESHOLD = 0.60; // 60% minimum for PASS
 
 /**
  * Coherence boost constants for different vortex types
- * These values maintain mathematical harmony with the emergent quality framework
- * and are indexed according to their importance using Fibonacci indices
+ * Each vortex type receives a different boost to its coherence score
+ * to reflect its relative importance in the system architecture
  */
-export const COHERENCE_BOOST_MONITORING = 0; // Base monitoring - no boost (index 0)
-export const COHERENCE_BOOST_TESTING = 0.05; // Testing vortex - moderate boost (index 5)
-export const COHERENCE_BOOST_PLANNING = 0.03; // Planning vortex - small boost (index 3)
-export const COHERENCE_BOOST_CORE = 0.08; // Core vortex - highest boost for ethical/philosophical core
+export const COHERENCE_BOOST_MONITORING = 0; // Base monitoring - no boost
+export const COHERENCE_BOOST_TESTING = 0.05; // Testing vortex - moderate boost for quality assurance
+export const COHERENCE_BOOST_PLANNING = 0.03; // Planning vortex - small boost for infrastructure planning
+export const COHERENCE_BOOST_CORE = 0.08; // Core vortex - highest boost for ethical/philosophical foundation
 
 export interface VortexNode {
   name: string;
