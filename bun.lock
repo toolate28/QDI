@@ -43,6 +43,22 @@
         "@spiralsafe/wave-toolkit": "workspace:*",
       },
     },
+    "packages/quantum-ethics": {
+      "name": "@spiralsafe/quantum-ethics",
+      "version": "1.0.0",
+      "dependencies": {
+        "@spiralsafe/atom-trail": "workspace:*",
+        "@spiralsafe/wave-toolkit": "workspace:*",
+      },
+      "peerDependencies": {
+        "framer-motion": "^10.0.0",
+        "react": "^18.0.0",
+      },
+      "optionalPeers": [
+        "framer-motion",
+        "react",
+      ],
+    },
     "packages/wave-toolkit": {
       "name": "@spiralsafe/wave-toolkit",
       "version": "1.0.0",
@@ -112,6 +128,8 @@
     "@spiralsafe/core": ["@spiralsafe/core@workspace:packages/core"],
 
     "@spiralsafe/mcp-server": ["@spiralsafe/mcp-server@workspace:apps/mcp-server"],
+
+    "@spiralsafe/quantum-ethics": ["@spiralsafe/quantum-ethics@workspace:packages/quantum-ethics"],
 
     "@spiralsafe/wave-toolkit": ["@spiralsafe/wave-toolkit@workspace:packages/wave-toolkit"],
 
