@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌀 SpiralSafe Live Vortex Visualization</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #e0e0e0;
+            overflow: hidden;
+        }
+        #container { width: 100vw; height: 100vh; display: flex; flex-direction: column; }
+        #header {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-bottom: 2px solid #7057ff;
+            text-align: center;
+        }
+        #header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #7057ff, #00d4aa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        #controls { display: flex; gap: 20px; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
+        .control-group { display: flex; align-items: center; gap: 10px; }
+        button {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #7057ff, #5a3fd6);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(112, 87, 255, 0.4); }
+        button:active { transform: translateY(0); }
+        #main-canvas { flex: 1; display: flex; justify-content: center; align-items: center; position: relative; }
+        canvas { border: 2px solid #7057ff; box-shadow: 0 0 30px rgba(112, 87, 255, 0.3); border-radius: 10px; }
+        #metrics {
+            position: absolute; top: 100px; left: 20px;
+            background: rgba(0, 0, 0, 0.8); padding: 20px;
+            border-radius: 10px; border: 1px solid #7057ff; min-width: 250px;
+        }
+        .metric { margin: 10px 0; display: flex; justify-content: space-between; align-items: center; }
+        .metric-label { color: #00d4aa; font-weight: bold; }
+        .metric-value { color: #7057ff; font-size: 1.2em; }
+        .metric-bar {
+            width: 150px; height: 10px; background: rgba(112, 87, 255, 0.2);
+            border-radius: 5px; overflow: hidden; margin-top: 5px;
+        }
+        .metric-bar-fill {
+            height: 100%; background: linear-gradient(90deg, #7057ff, #00d4aa);
+            transition: width 0.3s;
+        }
+        #legend {
+            position: absolute; top: 100px; right: 20px;
+            background: rgba(0, 0, 0, 0.8); padding: 20px;
+            border-radius: 10px; border: 1px solid #7057ff; max-width: 300px;
+        }
+        .legend-item { display: flex; align-items: center; margin: 10px 0; gap: 10px; }
+        .legend-color { width: 20px; height: 20px; border-radius: 50%; }
+        #phase-indicator {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8); padding: 15px 30px;
+            border-radius: 20px; border: 2px solid #7057ff;
+            font-size: 1.2em; font-weight: bold;
+        }
+        .phase-active { animation: pulse 1s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        @keyframes flash { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(2); } }
+        .status-good { color: #00d4aa; }
+        .status-warning { color: #fbca04; }
+        .status-danger { color: #ff6b6b; }
+        #info-panel {
+            position: absolute; bottom: 80px; left: 20px;
+            background: rgba(0, 0, 0, 0.8); padding: 15px;
+            border-radius: 10px; border: 1px solid #7057ff;
+            max-width: 400px; font-size: 0.9em; line-height: 1.6;
+        }
+        .slider { width: 150px; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="header">
+            <h1>🌀 SpiralSafe Live Vortex Visualization</h1>
+            <p>Real-time coherence flow through the 6-repository ecosystem</p>
+            <div id="controls">
+                <div class="control-group">
+                    <button id="playPause">⏸️ Pause</button>
+                    <button id="reset">🔄 Reset</button>
+                    <button id="snapIn">⚡ Trigger Snap-In</button>
+                </div>
+                <div class="control-group">
+                    <label>Speed:</label>
+                    <input type="range" id="speedSlider" class="slider" min="0.1" max="3" step="0.1" value="1">
+                    <span id="speedValue">1.0x</span>
+                </div>
+                <div class="control-group">
+                    <label>Coherence:</label>
+                    <input type="range" id="coherenceSlider" class="slider" min="0" max="100" step="1" value="65">
+                    <span id="coherenceValue">65%</span>
+                </div>
+            </div>
+        </div>
+        <div id="main-canvas">
+            <canvas id="vortexCanvas" width="1200" height="700"></canvas>
+            <div id="metrics">
+                <h3 style="color: #7057ff; margin-bottom: 15px;">📊 Metrics</h3>
+                <div class="metric"><span class="metric-label">Coherence:</span><span class="metric-value" id="coherenceMetric">65%</span></div>
+                <div class="metric-bar"><div class="metric-bar-fill" id="coherenceBar" style="width: 65%"></div></div>
+                <div class="metric"><span class="metric-label">Curl:</span><span class="metric-value" id="curlMetric">0.20</span></div>
+                <div class="metric-bar"><div class="metric-bar-fill" id="curlBar" style="width: 20%"></div></div>
+                <div class="metric"><span class="metric-label">Divergence:</span><span class="metric-value" id="divergenceMetric">0.25</span></div>
+                <div class="metric-bar"><div class="metric-bar-fill" id="divergenceBar" style="width: 25%"></div></div>
+                <div class="metric"><span class="metric-label">Potential:</span><span class="metric-value" id="potentialMetric">0.75</span></div>
+                <div class="metric-bar"><div class="metric-bar-fill" id="potentialBar" style="width: 75%"></div></div>
+                <div class="metric"><span class="metric-label">Fibonacci:</span><span class="metric-value" id="fibonacciMetric">21</span></div>
+                <div class="metric"><span class="metric-label">Sync:</span><span class="metric-value" id="syncMetric">4/6</span></div>
+            </div>
+            <div id="legend">
+                <h3 style="color: #7057ff; margin-bottom: 15px;">🎨 Legend</h3>
+                <div class="legend-item"><div class="legend-color" style="background: #7057ff;"></div><span>Central Vortex (QDI)</span></div>
+                <div class="legend-item"><div class="legend-color" style="background: #00d4aa;"></div><span>Coherent Repos (>60%)</span></div>
+                <div class="legend-item"><div class="legend-color" style="background: #fbca04;"></div><span>Synchronizing (60-70%)</span></div>
+                <div class="legend-item"><div class="legend-color" style="background: #ff6b6b;"></div><span>Low Coherence (<60%)</span></div>
+                <div class="legend-item"><div class="legend-color" style="background: #fff;"></div><span>Data Packets</span></div>
+                <div class="legend-item"><span style="color: #d4c5f9;">⚡</span><span>Snap-In Event</span></div>
+            </div>
+            <div id="phase-indicator">
+                Phase: <span id="currentPhase" class="phase-active">KENL</span> → <span id="nextPhase">AWI</span>
+            </div>
+            <div id="info-panel">
+                <strong>💡 Live Simulation</strong><br>
+                Watch git commits flow through the vortex:<br>
+                • <strong>Spiral arms</strong> = Fibonacci growth<br>
+                • <strong>Particles</strong> = Active commits<br>
+                • <strong>Pulse rings</strong> = Coherence waves<br>
+                • <strong>Nodes</strong> = 6-repo ecosystem<br>
+                • <strong>Colors</strong> = Coherence levels<br><br>
+                When coherence >70%, snap-in occurs! ⚡
+            </div>
+        </div>
+    </div>
+    <script src="vortex-animation.js"></script>
+</body>
+</html>
