@@ -68,11 +68,13 @@ console.log(`  Gates: ${circuit.gates.length}`);
 console.log(`  Depth: ${circuit.depth}\n`);
 
 // Track circuit execution with provenance
-// Simulate execution (in real scenario, would use actual backend)
+// NOTE: In this demo, circuit execution is simulated/mocked
+// Real deployments would use actual quantum backends
 const executionTimeMs = 42;
 
 const circuitProvenance = provenanceTracker.trackCircuitExecution('user-123', circuit, {
-  backend: 'mock_simulator',
+  backend: 'mock_simulator',  // This is a mock - not calling real Qiskit
+  executionTimeMs,
   executionTimeMs,
   coherenceScore: 85,
   parameters: {
@@ -90,6 +92,9 @@ console.log(`  Coherence score: ${circuitProvenance.coherenceScore}%`);
 console.log(`  ATOM tag: ${circuitProvenance.atomDecision.atom_tag}\n`);
 
 // 5. Qiskit Integration (async - would require real backend)
+// NOTE: The following section demonstrates Qiskit integration configuration
+// In this demo, actual Qiskit execution is NOT performed (mocked/simulated)
+// Real deployments should use actual Qiskit backends or quantum hardware
 console.log('--- Qiskit Integration ---');
 console.log('✓ Qiskit integration available for real quantum backends');
 console.log('  Supported backends:');
