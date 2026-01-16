@@ -24,7 +24,7 @@ jobs:
       result: ${{ steps.snap_detection.outputs.result }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -275,7 +275,7 @@ jobs:
     if: needs.detect-snap-in.outputs.snap_in == 'true'
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Generate orchard visualization
         run: |
