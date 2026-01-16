@@ -23,6 +23,16 @@ import {
 export const VORTEX_MARKER = "VORTEX::QDI::v1";
 export const COHERENCE_THRESHOLD = 0.6; // 60% minimum for PASS
 
+/**
+ * Coherence boost constants for different vortex types
+ * Each vortex type receives a different boost to its coherence score
+ * to reflect its relative importance in the system architecture
+ */
+export const COHERENCE_BOOST_MONITORING = 0; // Base monitoring - no boost
+export const COHERENCE_BOOST_TESTING = 0.05; // Testing vortex - moderate boost for quality assurance
+export const COHERENCE_BOOST_PLANNING = 0.03; // Planning vortex - small boost for infrastructure planning
+export const COHERENCE_BOOST_CORE = 0.08; // Core vortex - highest boost for ethical/philosophical foundation
+
 export interface VortexNode {
   name: string;
   status: "CLEAN" | "DIRTY" | "WARN" | "ERROR";
@@ -126,15 +136,10 @@ export function createVortexPayload(
 
   const vortexes: VortexCluster[] = [
     {
-      vortex_name: "MonitoringVortex",
-      description:
-        "Autonomous monitoring cluster – self-maintains coherence metrics",
-      coherence: normalizeCoherenceScore(waveAnalysis.coherence_score),
-      components: [
-        "CoherenceConstellation.tsx",
-        "SpectralAnalyzer.tsx",
-        "SessionMonitor.tsx",
-      ],
+      vortex_name: 'MonitoringVortex',
+      description: 'Autonomous monitoring cluster – self-maintains coherence metrics',
+      coherence: Math.min(1, waveAnalysis.coherence_score / 100 + COHERENCE_BOOST_MONITORING),
+      components: ['CoherenceConstellation.tsx', 'SpectralAnalyzer.tsx', 'SessionMonitor.tsx'],
       refinements: [
         {
           original: "CoherenceConstell.tsx",
@@ -146,18 +151,10 @@ export function createVortexPayload(
       ],
     },
     {
-      vortex_name: "TestingVortex",
-      description:
-        "Autonomous testing/compliance – self-maintains audits/proofs",
-      coherence: Math.min(
-        1,
-        normalizeCoherenceScore(waveAnalysis.coherence_score) + 0.05,
-      ),
-      components: [
-        "LoadTestingSimulator.tsx",
-        "ComplianceTracker.tsx",
-        "SortingHat.tsx",
-      ],
+      vortex_name: 'TestingVortex',
+      description: 'Autonomous testing/compliance – self-maintains audits/proofs',
+      coherence: Math.min(1, waveAnalysis.coherence_score / 100 + COHERENCE_BOOST_TESTING),
+      components: ['LoadTestingSimulator.tsx', 'ComplianceTracker.tsx', 'SortingHat.tsx'],
       refinements: [
         {
           original: "LoadTestingSimu.tsx",
@@ -168,17 +165,10 @@ export function createVortexPayload(
       ],
     },
     {
-      vortex_name: "PlanningVortex",
-      description: "Autonomous planning/infra – self-maintains transitions",
-      coherence: Math.min(
-        1,
-        normalizeCoherenceScore(waveAnalysis.coherence_score) + 0.03,
-      ),
-      components: [
-        "MigrationPlanner.tsx",
-        "HardwareBridge.tsx",
-        "TransitionTimeline.tsx",
-      ],
+      vortex_name: 'PlanningVortex',
+      description: 'Autonomous planning/infra – self-maintains transitions',
+      coherence: Math.min(1, waveAnalysis.coherence_score / 100 + COHERENCE_BOOST_PLANNING),
+      components: ['MigrationPlanner.tsx', 'HardwareBridge.tsx', 'TransitionTimeline.tsx'],
       refinements: [
         {
           original: "MigrationPlanner.tsx",
@@ -189,13 +179,10 @@ export function createVortexPayload(
       ],
     },
     {
-      vortex_name: "CoreVortex",
-      description: "Autonomous core/philo – self-maintains ethics",
-      coherence: Math.min(
-        1,
-        normalizeCoherenceScore(waveAnalysis.coherence_score) + 0.08,
-      ),
-      components: ["HopeSaucedPhilosophy.tsx", "StakeholderHub.tsx"],
+      vortex_name: 'CoreVortex',
+      description: 'Autonomous core/philo – self-maintains ethics',
+      coherence: Math.min(1, waveAnalysis.coherence_score / 100 + COHERENCE_BOOST_CORE),
+      components: ['HopeSaucedPhilosophy.tsx', 'StakeholderHub.tsx'],
       refinements: [
         {
           original: "HopeSaucedPhilo.tsx",
