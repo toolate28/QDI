@@ -59,6 +59,12 @@ export const DEFAULT_QISKIT_CONFIG: QiskitBackendConfig = {
  * Get noise level value for noise model
  */
 function getNoiseLevel(noiseModel: string): string {
+  // Validate noise model is one of expected values
+  const validNoiseModels = ['ideal', 'low', 'medium', 'high'];
+  if (!validNoiseModels.includes(noiseModel)) {
+    throw new Error(`Invalid noise model: ${noiseModel}. Must be one of: ${validNoiseModels.join(', ')}`);
+  }
+  
   switch (noiseModel) {
     case 'high':
       return '0.05';
@@ -66,8 +72,40 @@ function getNoiseLevel(noiseModel: string): string {
       return '0.02';
     case 'low':
       return '0.005';
+    case 'ideal':
     default:
       return '0.005';
+  }
+}
+
+/**
+ * Validate gate parameter is a valid number within reasonable bounds
+ */
+function validateGateParameter(param: any, name: string): number {
+  if (typeof param !== 'number' || !isFinite(param)) {
+    throw new Error(`Invalid ${name}: must be a finite number`);
+  }
+  return param;
+}
+
+/**
+ * Validate qubit count is within reasonable bounds
+ */
+function validateQubitCount(qubits: any): number {
+  const count = Number(qubits);
+  if (!Number.isInteger(count) || count < 1 || count > 100) {
+    throw new Error(`Invalid qubit count: ${qubits}. Must be an integer between 1 and 100`);
+  }
+  return count;
+}
+
+/**
+ * Validate backend is one of expected values
+ */
+function validateBackend(backend: string): void {
+  const validBackends = ['aer_simulator', 'statevector_simulator', 'ibmq', 'fake_backend'];
+  if (!validBackends.includes(backend)) {
+    throw new Error(`Invalid backend: ${backend}. Must be one of: ${validBackends.join(', ')}`);
   }
 }
 
@@ -107,8 +145,21 @@ export class QiskitIntegration {
       // Execute Python script
       const result = await this.executePython(scriptPath, outputPath);
       
-      // Parse results
-      const executionResult: QiskitExecutionResult = JSON.parse(result);
+      // Parse and validate results
+      const parsedResult = JSON.parse(result);
+      
+      // Validate required fields
+      if (!parsedResult || typeof parsedResult !== 'object') {
+        throw new Error('Invalid Qiskit execution result: not an object');
+      }
+      if (!parsedResult.metadata || typeof parsedResult.metadata !== 'object') {
+        throw new Error('Invalid Qiskit execution result: missing metadata');
+      }
+      if (!parsedResult.counts && !parsedResult.statevector) {
+        throw new Error('Invalid Qiskit execution result: missing counts or statevector');
+      }
+      
+      const executionResult: QiskitExecutionResult = parsedResult as QiskitExecutionResult;
       executionResult.metadata.executionTime = Date.now() - startTime;
       executionResult.metadata.timestamp = new Date().toISOString();
       
@@ -170,45 +221,71 @@ export class QiskitIntegration {
    * Export provenance to JSON
    */
   exportProvenance(filepath: string): void {
-    writeFileSync(filepath, JSON.stringify(this.provenanceLog, null, 2));
+    // Validate filepath to prevent path traversal
+    const resolvedPath = require('path').resolve(filepath);
+    const tmpPath = tmpdir();
+    const currentDir = process.cwd();
+    
+    // Allow writing to temp dir or current working directory and subdirectories
+    if (!resolvedPath.startsWith(tmpPath) && !resolvedPath.startsWith(currentDir)) {
+      throw new Error(`Invalid filepath: ${filepath}. Must be within temp directory or current working directory`);
+    }
+    
+    writeFileSync(resolvedPath, JSON.stringify(this.provenanceLog, null, 2));
   }
 
   /**
    * Generate Python script for Qiskit execution
    */
   private generatePythonScript(circuit: QuantumCircuit, config: QiskitBackendConfig): string {
+    // Validate inputs
+    validateBackend(config.backend);
+    const validatedQubits = validateQubitCount(circuit.qubits);
+    
+    // Validate and sanitize gate parameters
     const gateCommands = circuit.gates.map(gate => {
+      const target = validateGateParameter(gate.target, 'gate.target');
+      
       switch (gate.type) {
         case 'H':
-          return `qc.h(${gate.target})`;
+          return `qc.h(${target})`;
         case 'X':
-          return `qc.x(${gate.target})`;
+          return `qc.x(${target})`;
         case 'Y':
-          return `qc.y(${gate.target})`;
+          return `qc.y(${target})`;
         case 'Z':
-          return `qc.z(${gate.target})`;
-        case 'CNOT':
-          return `qc.cx(${gate.control}, ${gate.target})`;
-        case 'RX':
-          return `qc.rx(${gate.parameter}, ${gate.target})`;
-        case 'RY':
-          return `qc.ry(${gate.parameter}, ${gate.target})`;
-        case 'RZ':
-          return `qc.rz(${gate.parameter}, ${gate.target})`;
+          return `qc.z(${target})`;
+        case 'CNOT': {
+          const control = validateGateParameter(gate.control, 'gate.control');
+          return `qc.cx(${control}, ${target})`;
+        }
+        case 'RX': {
+          const param = validateGateParameter(gate.parameter, 'gate.parameter');
+          return `qc.rx(${param}, ${target})`;
+        }
+        case 'RY': {
+          const param = validateGateParameter(gate.parameter, 'gate.parameter');
+          return `qc.ry(${param}, ${target})`;
+        }
+        case 'RZ': {
+          const param = validateGateParameter(gate.parameter, 'gate.parameter');
+          return `qc.rz(${param}, ${target})`;
+        }
         case 'MEASURE':
-          return `qc.measure(${gate.target}, ${gate.target})`;
+          return `qc.measure(${target}, ${target})`;
         default:
           return `# Unknown gate: ${gate.type}`;
       }
     }).join('\n');
 
-    // Add noise model if specified
-    const noiseModelCode = config.noise_model !== 'ideal' ? `
+    // Validate and use noise model
+    const noiseModel = config.noise_model || 'ideal';
+    const noiseModelCode = noiseModel !== 'ideal' ? `
 from qiskit_aer.noise import NoiseModel, depolarizing_error
 
 # Create noise model
 noise_model = NoiseModel()
-noise_level = ${getNoiseLevel(config.noise_model)}
+noise_level = ${getNoiseLevel(noiseModel)}
 error = depolarizing_error(noise_level, 1)
 noise_model.add_all_qubit_quantum_error(error, ['h', 'x', 'y', 'z', 'rx', 'ry', 'rz'])
 error_2q = depolarizing_error(noise_level * 2, 2)
@@ -249,8 +326,8 @@ import sys
 from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
 
 # Create quantum circuit
-qr = QuantumRegister(${circuit.qubits}, 'q')
-cr = ClassicalRegister(${circuit.qubits}, 'c')
+qr = QuantumRegister(${validatedQubits}, 'q')
+cr = ClassicalRegister(${validatedQubits}, 'c')
 qc = QuantumCircuit(qr, cr)
 
 # Apply gates
