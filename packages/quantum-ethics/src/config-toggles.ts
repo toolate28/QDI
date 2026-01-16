@@ -272,8 +272,7 @@ export class ConfigurationManager {
           },
           metadata: {
             version: '1.0.0',
-            description: 'Educational configuration optimized for learning',
-            warning: 'PII encryption is disabled. Use only with synthetic data, never with real PII.'
+            description: 'Educational configuration optimized for learning. Warning: PII encryption is disabled. Use only with synthetic data, never with real PII.'
           }
         };
       
