@@ -151,9 +151,20 @@ function drawSnapIn() {
     if (snapInTime > 3) { snapInActive = false; snapInTime = 0; }
 }
 
+// Constants for curl and divergence calculations
+const CURL_BASE = 0.1;
+const CURL_AMPLITUDE = 0.1;
+const CURL_OFFSET = 0.1;
+const CURL_FREQUENCY = 0.5;
+
+const DIVERGENCE_BASE = 0.15;
+const DIVERGENCE_AMPLITUDE = 0.1;
+const DIVERGENCE_OFFSET = 0.1;
+const DIVERGENCE_FREQUENCY = 0.3;
+
 function updateMetrics() {
-    const curl = 0.1 + Math.sin(time * 0.5) * 0.1 + 0.1;
-    const divergence = 0.15 + Math.cos(time * 0.3) * 0.1 + 0.1;
+    const curl = CURL_BASE + Math.sin(time * CURL_FREQUENCY) * CURL_AMPLITUDE + CURL_OFFSET;
+    const divergence = DIVERGENCE_BASE + Math.cos(time * DIVERGENCE_FREQUENCY) * DIVERGENCE_AMPLITUDE + DIVERGENCE_OFFSET;
     const potential = coherence / 100;
     const fibIndex = Math.floor(potential * 10);
     const fibonacci = FIBONACCI[Math.min(fibIndex, FIBONACCI.length - 1)];
