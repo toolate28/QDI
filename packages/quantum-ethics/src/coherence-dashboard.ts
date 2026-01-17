@@ -45,7 +45,7 @@ export interface CoherenceDashboard {
 }
 
 export interface DashboardConfig {
-  coherenceTarget: number; // Target coherence score (default 70 or 95)
+  coherenceTarget: number; // Target coherence score in 0-100 scale (default 70 or 95)
   curlThreshold: number; // Max acceptable curl (default 0.3)
   divergenceIdeal: number; // Ideal divergence (default 0.2)
   potentialMinimum: number; // Min acceptable potential (default 0.5)

@@ -9,6 +9,22 @@
  *
  * Emergent quality target: >60%
  * Fibonacci ratio: 1.618
+ * 
+ * === COHERENCE SCORE SCALE CONVENTION ===
+ * This module works with coherence scores in two scales:
+ * 
+ * 1. INPUT (from wave-toolkit): 0-100 scale
+ *    - analyzeWave() returns coherence_score in 0-100 range
+ *    - This is the "raw" score for human readability
+ * 
+ * 2. INTERNAL PROCESSING: 0-1 scale
+ *    - COHERENCE_THRESHOLD and other thresholds use 0-1 scale
+ *    - normalizeCoherenceScore() converts from 0-100 to 0-1
+ *    - VortexResult.coherenceScore is in 0-1 scale
+ *    - VortexCluster.coherence is in 0-1 scale
+ * 
+ * Always use normalizeCoherenceScore() when converting from wave-toolkit
+ * results to internal processing values.
  */
 
 import { type AtomDecision, createDecision } from "@spiralsafe/atom-trail";
@@ -21,6 +37,11 @@ import {
 
 // VORTEX Marker for cross-system integration
 export const VORTEX_MARKER = "VORTEX::QDI::v1";
+/**
+ * Minimum coherence threshold for PASS status (0-1 scale)
+ * Note: This is in 0-1 scale. Wave-toolkit returns scores in 0-100 scale,
+ * so use normalizeCoherenceScore() to convert before comparison.
+ */
 export const COHERENCE_THRESHOLD = 0.6; // 60% minimum for PASS
 
 export interface VortexNode {
@@ -47,6 +68,7 @@ export interface VortexConfig {
 
 export interface VortexResult {
   timestamp: string;
+  /** Coherence score in 0-1 scale (normalized from wave-toolkit's 0-100 scale) */
   coherenceScore: number;
   emergentQuality: string;
   passed: boolean;
@@ -72,6 +94,7 @@ export interface VortexDashboardPayload {
 export interface VortexCluster {
   vortex_name: string;
   description: string;
+  /** Coherence score in 0-1 scale (normalized and possibly boosted) */
   coherence: number;
   components: string[];
   refinements: VortexRefinement[];
@@ -107,7 +130,12 @@ const DEFAULT_VORTEX_CONFIG: VortexConfig = {
 
 /**
  * Normalize coherence score from 0-100 scale to 0-1 scale
- * @param rawScore - The coherence score in 0-100 range
+ * 
+ * Note: wave-toolkit's analyzeWave() returns coherence_score in 0-100 scale
+ * for human readability. This function converts it to 0-1 scale for internal
+ * calculations and comparison with COHERENCE_THRESHOLD (which is in 0-1 scale).
+ * 
+ * @param rawScore - The coherence score in 0-100 range from wave-toolkit
  * @return Normalized score in 0-1 range, clamped to valid bounds
  */
 function normalizeCoherenceScore(rawScore: number): number {

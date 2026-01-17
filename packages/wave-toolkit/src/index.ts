@@ -30,6 +30,7 @@ export interface WaveAnalysisResult {
   input_preview: string;
   metrics: WaveMetrics;
   coherence: CoherenceMetrics;
+  /** Overall coherence score on a 0-100 scale (higher is better) */
   coherence_score: number;
   chaos_score: number;
   warnings: string[];
@@ -130,7 +131,14 @@ export function calculateChaosScore(metrics: CoherenceMetrics): number {
 }
 
 /**
- * Analyze text for WAVE patterns
+ * Analyze text as wave field
+ * 
+ * @param input - The text to analyze
+ * @returns WaveAnalysisResult with coherence_score in 0-100 scale
+ * 
+ * Note: The coherence_score is returned on a 0-100 scale for human readability.
+ * If you need to use this score in calculations with 0-1 normalized values,
+ * divide by 100 or use a normalization function.
  */
 export function analyzeWave(input: string): WaveAnalysisResult {
   const warnings: string[] = [];
