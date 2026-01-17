@@ -237,6 +237,10 @@ DEFAULT_CORPUS_PATH = Path(__file__).parent / 'docs' / 'vortex-corpus-collapse.j
 # Fibonacci sequence for weighted calculations
 FIBONACCI = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144]
 
+# Expected number of surjection transitions in the corpus
+# (Repos→Phases, Forks→Contributions, Tags→ATOM, Relations→Lattice, Discussions→KB, Tools→HOPE)
+EXPECTED_SURJECTION_TRANSITIONS = 6
+
 
 def load_vortex_corpus(path: Optional[str] = None) -> Dict[str, Any]:
     """
@@ -330,8 +334,8 @@ def _enforce_surjections(corpus: Dict[str, Any]) -> Dict[str, Any]:
         # Check Fibonacci phase weights are properly ordered and valid
         if fib_phases:
             weights = [p.get('fib_weight', 0) for p in fib_phases]
-            # Check monotonic increasing
-            is_monotonic = all(weights[i] <= weights[i+1] for i in range(len(weights)-1))
+            # Check strictly increasing (Fibonacci values should increase)
+            is_monotonic = all(weights[i] < weights[i+1] for i in range(len(weights)-1))
             # Check all weights are valid Fibonacci numbers
             fib_set = set(FIBONACCI)
             all_fib = all(w in fib_set for w in weights)
@@ -413,7 +417,7 @@ def _auto_curl_divergences(corpus: Dict[str, Any]) -> Dict[str, Any]:
             'type': 'quality_below_threshold',
             'current': emergent_quality,
             'required': quality_min,
-            'message': f'Emergent quality {emergent_quality:.1%} below minimum {quality_min:.0%}'
+            'message': f'Emergent quality {emergent_quality:.1%} below minimum {quality_min:.1%}'
         })
         curl_detected = True
     
@@ -439,12 +443,12 @@ def _auto_curl_divergences(corpus: Dict[str, Any]) -> Dict[str, Any]:
     transitions = corpus.get('transitions_mapping', {})
     surjection_transitions = transitions.get('surjection_transitions', [])
     
-    if len(surjection_transitions) < 6:
+    if len(surjection_transitions) < EXPECTED_SURJECTION_TRANSITIONS:
         divergences.append({
             'type': 'incomplete_transitions',
             'count': len(surjection_transitions),
-            'expected': 6,
-            'message': f'Only {len(surjection_transitions)} of 6 expected transitions defined'
+            'expected': EXPECTED_SURJECTION_TRANSITIONS,
+            'message': f'Only {len(surjection_transitions)} of {EXPECTED_SURJECTION_TRANSITIONS} expected transitions defined'
         })
         curl_detected = True
     
