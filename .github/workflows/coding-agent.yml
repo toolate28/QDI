@@ -42,13 +42,50 @@ jobs:
           echo "ATOM provenance tracked for ethical review"
 
       - name: Comment on PR
-        if: github.event_name == 'pull_request' && steps.simulate.outcome == 'success'
+        if: >-
+          github.event_name == 'pull_request' &&
+          steps.simulate.outcome == 'success'
         uses: actions/github-script@v7
         with:
           script: |
+            // Security: Sanitize user-controlled input to prevent
+            // injection attacks. This function escapes special
+            // characters that could be used for injection
+            const sanitizeInput = (input) => {
+              if (typeof input !== 'string') return '';
+              // Escape markdown special characters and HTML tags
+              return input
+                .replace(/[<>&"']/g, (char) => {
+                  const entities = {
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '&': '&amp;',
+                    '"': '&quot;',
+                    "'": '&#39;'
+                  };
+                  return entities[char];
+                })
+                .trim();
+            };
+
+            // Use hardcoded safe message (current implementation)
+            const message = '🌀 **Agent Review**: Coherence >60%. ' +
+              'Ethical quantum sims validated. Ready for merge.';
+
+            // Example of safely using user-controlled data
+            // (for future extensions):
+            // const prTitle = sanitizeInput(
+            //   context.payload.pull_request?.title || ''
+            // );
+            // const prBody = sanitizeInput(
+            //   context.payload.pull_request?.body || ''
+            // );
+            // const customMessage = `🌀 **Agent Review**: ` +
+            //   `Analyzing PR "${prTitle}"\n\n${message}`;
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '🌀 **Agent Review**: Coherence >60%. Ethical quantum sims validated. Ready for merge.'
+              body: message
             })
