@@ -49,6 +49,9 @@ def _get_atom_counter(atom_type: str) -> int:
     """
     Get and increment the counter for a given ATOM type.
     
+    Note: This function is not thread-safe or multi-process safe. It is designed
+    for single-process execution in GitHub Actions workflows.
+    
     Args:
         atom_type: ATOM decision type (e.g., 'COMPLETE', 'DOC', 'VERIFY')
         
@@ -113,8 +116,15 @@ def _create_atom_decision(
         
     Returns:
         ATOM decision dictionary
+        
+    Raises:
+        OSError: If unable to create directories or write decision file
     """
-    _ensure_atom_trail_dirs()
+    try:
+        _ensure_atom_trail_dirs()
+    except OSError as e:
+        print(f"Error: Failed to create ATOM trail directories: {e}", file=sys.stderr)
+        raise
     
     atom_tag = _generate_atom_tag(atom_type, description)
     timestamp = datetime.now().isoformat()
@@ -132,8 +142,12 @@ def _create_atom_decision(
     
     # Persist decision to file
     decision_file = ATOM_DECISIONS_DIR / f"{atom_tag}.json"
-    with open(decision_file, 'w') as f:
-        json.dump(decision, f, indent=2)
+    try:
+        with open(decision_file, 'w') as f:
+            json.dump(decision, f, indent=2)
+    except (OSError, PermissionError) as e:
+        print(f"Error: Failed to write ATOM decision to {decision_file}: {e}", file=sys.stderr)
+        raise
     
     return decision
 
