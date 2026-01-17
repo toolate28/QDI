@@ -375,9 +375,11 @@ export function fibonacciCoherenceBoost(
   baseCoherence: number,
   iteration: number,
 ): number {
+  // Ensure base coherence is within [0, 1] before applying boost
+  const normalizedBaseCoherence = Math.max(0, Math.min(1, baseCoherence));
   const fibIndex = Math.min(iteration, FIBONACCI.length - 1);
   const fibWeight = FIBONACCI[fibIndex] / FIBONACCI[FIBONACCI.length - 1];
-  return Math.min(1, baseCoherence + fibWeight * 0.1);
+  return Math.min(1, normalizedBaseCoherence + fibWeight * 0.1);
 }
 
 // Export for use in dashboard and endpoints
