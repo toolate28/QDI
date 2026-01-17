@@ -143,22 +143,21 @@ def simulate_circuit(circuit_str: Optional[str] = None) -> dict:
         dict with simulation results including VORTEX marker
     """
     # Validate circuit string before attempting simulation
+    # This ensures errors are caught even when Qiskit is not installed
     if circuit_str:
-        # Parse and validate gate sequence like "h(0); cx(0,1)"
         for raw_gate in circuit_str.split(';'):
             if not raw_gate.strip():
                 continue
                 
             parsed = _parse_gate(raw_gate)
             if parsed is None:
-                # Check if it's a qubit index out of range error
+                # Generate specific error message
                 gate_str = raw_gate.strip().lower()
                 error_msg = f"Invalid gate syntax: {raw_gate.strip()}"
                 
-                # Use helper functions to extract qubit indices and generate specific error
+                # Check if it's a range error vs syntax error
                 qubits = _extract_qubit_indices(gate_str)
                 if qubits is not None and not _validate_qubit_range(qubits):
-                    # Successfully parsed gate but indices out of range
                     error_msg = _get_range_error_message(qubits)
                 
                 return {
@@ -176,19 +175,17 @@ def simulate_circuit(circuit_str: Optional[str] = None) -> dict:
         
         if circuit_str:
             # Parse simple gate sequence like "h(0); cx(0,1)"
-            # First pass: determine number of qubits needed
+            # Gates have already been validated above
             max_qubit = 1
             parsed_gates = []
             
             for raw_gate in circuit_str.split(';'):
+                if not raw_gate.strip():
+                    continue
+                    
                 parsed = _parse_gate(raw_gate)
+                # This should not be None due to validation above, but check defensively
                 if parsed is None:
-                    if raw_gate.strip():  # Non-empty but invalid (shouldn't reach here due to validation above)
-                        return {
-                            'status': 'error',
-                            'error': f"Invalid gate syntax: {raw_gate.strip()}",
-                            'vortex': VORTEX_MARKER
-                        }
                     continue
                 
                 gate_type, qubits = parsed
