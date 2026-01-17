@@ -21,9 +21,9 @@ import argparse
 import sys
 from typing import Optional, Tuple
 
-# Default simulated coherence for well-prepared quantum states
-# In production, this would be measured via state tomography
-DEFAULT_SIMULATED_COHERENCE = 0.85
+# Default simulated coherence aligned with the '>60%' workflow threshold
+# In production, this would be measured via state tomography instead of a fixed stub value
+DEFAULT_SIMULATED_COHERENCE = 0.6
 
 # VORTEX marker for endpoint integration
 VORTEX_MARKER = "VORTEX::QDI::v1"
