@@ -554,6 +554,9 @@ describe('fibonacciCoherenceBoost', () => {
 
   test('should handle perfect base coherence', () => {
     const baseCoherence = 1.0;
+    if (typeof fibonacciCoherenceBoost !== 'function') {
+      throw new Error('fibonacciCoherenceBoost is not a function');
+    }
     const boosted = fibonacciCoherenceBoost(baseCoherence, 5);
 
     // Should remain at 1.0
