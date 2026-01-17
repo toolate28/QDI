@@ -63,7 +63,7 @@ def _get_atom_counter(atom_type: str) -> int:
     if counter_file.exists():
         try:
             counter = int(counter_file.read_text().strip()) + 1
-        except (ValueError, FileNotFoundError):
+        except ValueError:
             counter = 1
     
     counter_file.write_text(str(counter))
