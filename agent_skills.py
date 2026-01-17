@@ -19,7 +19,7 @@ Usage:
 
 import argparse
 import sys
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 # Default simulated coherence aligned with the '>60%' workflow threshold
 # In production, this would be measured via state tomography instead of a fixed stub value
@@ -30,6 +30,30 @@ MAX_QUBIT_INDEX = 100
 
 # VORTEX marker for endpoint integration
 VORTEX_MARKER = "VORTEX::QDI::v1"
+
+
+def _extract_qubit_indices(gate_str: str) -> Optional[Union[Tuple[int], Tuple[int, int]]]:
+    """
+    Extract qubit indices from a gate string without validation.
+    
+    Args:
+        gate_str: Lowercase gate string like 'h(0)' or 'cx(0,1)'
+        
+    Returns:
+        Tuple of qubit indices or None if parsing fails
+    """
+    try:
+        if gate_str.startswith('h(') and gate_str.endswith(')'):
+            return (int(gate_str[2:-1]),)
+        elif gate_str.startswith('x(') and gate_str.endswith(')'):
+            return (int(gate_str[2:-1]),)
+        elif gate_str.startswith('cx(') and gate_str.endswith(')'):
+            params = gate_str[3:-1].split(',')
+            if len(params) == 2:
+                return (int(params[0].strip()), int(params[1].strip()))
+    except (ValueError, IndexError):
+        pass
+    return None
 
 
 def _parse_gate(raw_gate: str) -> Optional[Tuple[str, Tuple]]:
@@ -49,29 +73,28 @@ def _parse_gate(raw_gate: str) -> Optional[Tuple[str, Tuple]]:
     if not gate:
         return None
     
-    try:
-        if gate.startswith('h(') and gate.endswith(')'):
-            qubit = int(gate[2:-1])
-            if qubit < 0 or qubit > MAX_QUBIT_INDEX:
-                return None
-            return ('h', (qubit,))
-        elif gate.startswith('x(') and gate.endswith(')'):
-            qubit = int(gate[2:-1])
-            if qubit < 0 or qubit > MAX_QUBIT_INDEX:
-                return None
-            return ('x', (qubit,))
-        elif gate.startswith('cx(') and gate.endswith(')'):
-            params = gate[3:-1].split(',')
-            if len(params) != 2:
-                return None
-            control, target = int(params[0].strip()), int(params[1].strip())
-            if control < 0 or control > MAX_QUBIT_INDEX or target < 0 or target > MAX_QUBIT_INDEX:
-                return None
-            return ('cx', (control, target))
-    except (ValueError, IndexError):
+    # Determine gate type
+    gate_type = None
+    if gate.startswith('h(') and gate.endswith(')'):
+        gate_type = 'h'
+    elif gate.startswith('x(') and gate.endswith(')'):
+        gate_type = 'x'
+    elif gate.startswith('cx(') and gate.endswith(')'):
+        gate_type = 'cx'
+    else:
         return None
     
-    return None
+    # Extract and validate qubit indices
+    qubits = _extract_qubit_indices(gate)
+    if qubits is None:
+        return None
+    
+    # Validate range
+    for qubit in qubits:
+        if qubit < 0 or qubit > MAX_QUBIT_INDEX:
+            return None
+    
+    return (gate_type, qubits)
 
 
 def simulate_circuit(circuit_str: Optional[str] = None) -> dict:
@@ -97,26 +120,21 @@ def simulate_circuit(circuit_str: Optional[str] = None) -> dict:
                 gate_str = raw_gate.strip().lower()
                 error_msg = f"Invalid gate syntax: {raw_gate.strip()}"
                 
-                # Try to detect if it's specifically a range error
-                try:
-                    if gate_str.startswith('h(') and gate_str.endswith(')'):
-                        qubit = int(gate_str[2:-1])
-                        if qubit < 0 or qubit > MAX_QUBIT_INDEX:
-                            error_msg = f"Qubit index {qubit} out of range. Must be between 0 and {MAX_QUBIT_INDEX}."
-                    elif gate_str.startswith('x(') and gate_str.endswith(')'):
-                        qubit = int(gate_str[2:-1])
-                        if qubit < 0 or qubit > MAX_QUBIT_INDEX:
-                            error_msg = f"Qubit index {qubit} out of range. Must be between 0 and {MAX_QUBIT_INDEX}."
-                    elif gate_str.startswith('cx(') and gate_str.endswith(')'):
-                        params = gate_str[3:-1].split(',')
-                        if len(params) == 2:
-                            control, target = int(params[0].strip()), int(params[1].strip())
-                            if control < 0 or control > MAX_QUBIT_INDEX:
-                                error_msg = f"Control qubit index {control} out of range. Must be between 0 and {MAX_QUBIT_INDEX}."
-                            elif target < 0 or target > MAX_QUBIT_INDEX:
-                                error_msg = f"Target qubit index {target} out of range. Must be between 0 and {MAX_QUBIT_INDEX}."
-                except (ValueError, IndexError):
-                    pass  # Keep the generic syntax error message
+                # Use helper function to extract qubit indices and check if it's a range error
+                qubits = _extract_qubit_indices(gate_str)
+                if qubits is not None:
+                    # Successfully parsed gate, so it must be a range error
+                    if len(qubits) == 1:
+                        # Single-qubit gate
+                        if qubits[0] < 0 or qubits[0] > MAX_QUBIT_INDEX:
+                            error_msg = f"Qubit index {qubits[0]} out of range. Must be between 0 and {MAX_QUBIT_INDEX}."
+                    elif len(qubits) == 2:
+                        # Two-qubit gate
+                        control, target = qubits
+                        if control < 0 or control > MAX_QUBIT_INDEX:
+                            error_msg = f"Control qubit index {control} out of range. Must be between 0 and {MAX_QUBIT_INDEX}."
+                        elif target < 0 or target > MAX_QUBIT_INDEX:
+                            error_msg = f"Target qubit index {target} out of range. Must be between 0 and {MAX_QUBIT_INDEX}."
                 
                 return {
                     'status': 'error',
