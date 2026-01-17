@@ -18,7 +18,11 @@ Usage:
 """
 
 import argparse
+import json
+import os
 import sys
+from datetime import datetime
+from pathlib import Path
 from typing import Optional, Tuple
 
 # Default simulated coherence aligned with the '>60%' workflow threshold
@@ -27,6 +31,107 @@ DEFAULT_SIMULATED_COHERENCE = 0.6
 
 # VORTEX marker for endpoint integration
 VORTEX_MARKER = "VORTEX::QDI::v1"
+
+# ATOM trail directory structure
+ATOM_TRAIL_DIR = Path(".atom-trail")
+ATOM_COUNTERS_DIR = ATOM_TRAIL_DIR / "counters"
+ATOM_DECISIONS_DIR = ATOM_TRAIL_DIR / "decisions"
+
+
+def _ensure_atom_trail_dirs():
+    """Ensure ATOM trail directory structure exists."""
+    ATOM_TRAIL_DIR.mkdir(exist_ok=True)
+    ATOM_COUNTERS_DIR.mkdir(exist_ok=True)
+    ATOM_DECISIONS_DIR.mkdir(exist_ok=True)
+
+
+def _get_atom_counter(atom_type: str) -> int:
+    """
+    Get and increment the counter for a given ATOM type.
+    
+    Args:
+        atom_type: ATOM decision type (e.g., 'COMPLETE', 'DOC', 'VERIFY')
+        
+    Returns:
+        The next counter value
+    """
+    date_str = datetime.now().strftime('%Y%m%d')
+    counter_key = f"{atom_type}-{date_str}"
+    counter_file = ATOM_COUNTERS_DIR / f"{counter_key}.txt"
+    
+    counter = 1
+    if counter_file.exists():
+        try:
+            counter = int(counter_file.read_text().strip()) + 1
+        except (ValueError, FileNotFoundError):
+            counter = 1
+    
+    counter_file.write_text(str(counter))
+    return counter
+
+
+def _generate_atom_tag(atom_type: str, description: str) -> str:
+    """
+    Generate ATOM tag: ATOM-TYPE-YYYYMMDD-NNN-description
+    
+    Args:
+        atom_type: ATOM decision type
+        description: Description of the decision
+        
+    Returns:
+        Formatted ATOM tag
+    """
+    date_str = datetime.now().strftime('%Y%m%d')
+    counter = _get_atom_counter(atom_type)
+    
+    # Create slug from description
+    slug = description.lower()
+    slug = ''.join(c if c.isalnum() or c == '-' else '-' for c in slug)
+    slug = '-'.join(filter(None, slug.split('-')))[:50]
+    
+    return f"ATOM-{atom_type}-{date_str}-{counter:03d}-{slug}"
+
+
+def _create_atom_decision(
+    atom_type: str,
+    description: str,
+    files: Optional[list] = None,
+    tags: Optional[list] = None
+) -> dict:
+    """
+    Create an ATOM decision record and persist it to the trail.
+    
+    Args:
+        atom_type: ATOM decision type
+        description: Description of the decision
+        files: Optional list of files associated with the decision
+        tags: Optional list of tags
+        
+    Returns:
+        ATOM decision dictionary
+    """
+    _ensure_atom_trail_dirs()
+    
+    atom_tag = _generate_atom_tag(atom_type, description)
+    timestamp = datetime.now().isoformat()
+    
+    decision = {
+        'atom_tag': atom_tag,
+        'type': atom_type,
+        'description': description,
+        'timestamp': timestamp,
+        'files': files or [],
+        'tags': tags or [],
+        'freshness': 'fresh',
+        'verified': False
+    }
+    
+    # Persist decision to file
+    decision_file = ATOM_DECISIONS_DIR / f"{atom_tag}.json"
+    with open(decision_file, 'w') as f:
+        json.dump(decision, f, indent=2)
+    
+    return decision
 
 
 def _parse_gate(raw_gate: str) -> Optional[Tuple[str, Tuple]]:
@@ -189,13 +294,16 @@ def check_coherence(threshold: float = 0.6) -> dict:
 
 def cascade_integration(pr_body: Optional[str] = None) -> dict:
     """
-    Cascade provenance integration for PRs.
+    Cascade provenance integration for PRs with ATOM trail tracking.
+    
+    Creates an ATOM decision record for the cascade operation and persists
+    it to the ATOM trail directory structure for full provenance tracking.
     
     Args:
         pr_body: Pull request body text
         
     Returns:
-        dict with cascade results including VORTEX marker
+        dict with cascade results including ATOM decision and VORTEX marker
     """
     keywords = ['provenance', 'ethical', 'quantum', 'coherence', 'atom', 'vortex', 'spiral']
     found = []
@@ -204,11 +312,22 @@ def cascade_integration(pr_body: Optional[str] = None) -> dict:
         body_lower = pr_body.lower()
         found = [kw for kw in keywords if kw in body_lower]
     
+    # Create ATOM decision for provenance tracking
+    description = f"PR cascade integration: {len(found)} ethical keywords detected"
+    decision = _create_atom_decision(
+        atom_type='VERIFY',
+        description=description,
+        files=['pr_body'],
+        tags=['cascade', 'provenance', 'ethical-review'] + found
+    )
+    
     return {
         'status': 'cascaded',
         'keywords_found': found,
         'provenance_tracked': True,
-        'message': f"Cascade complete. Found {len(found)} ethical keywords.",
+        'atom_decision': decision,
+        'atom_tag': decision['atom_tag'],
+        'message': f"Cascade complete. Found {len(found)} ethical keywords. ATOM decision: {decision['atom_tag']}",
         'vortex': VORTEX_MARKER
     }
 
