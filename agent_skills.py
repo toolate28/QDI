@@ -91,7 +91,7 @@ def simulate_circuit(circuit_str: Optional[str] = None) -> dict:
                     if raw_gate.strip():  # Non-empty but invalid
                         return {
                             'status': 'error',
-                            'error': f"Invalid gate syntax: '{raw_gate.strip()}'",
+                            'error': f"Invalid gate syntax: {raw_gate.strip()}",
                             'vortex': VORTEX_MARKER
                         }
                     continue
