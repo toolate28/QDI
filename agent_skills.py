@@ -215,16 +215,34 @@ def cascade_integration(pr_body: Optional[str] = None) -> dict:
 
 def review_pr() -> dict:
     """
-    Generate PR review comments.
+    Generate PR review comments based on a coherence check.
     
     Returns:
-        dict with review results including VORTEX marker
+        dict with review results including VORTEX marker. The result is
+        derived from an actual coherence check rather than hardcoded values.
     """
+    # Perform an actual coherence check using the default threshold.
+    coherence_result = check_coherence()
+    passed = bool(coherence_result.get('passed'))
+    coherence_value = coherence_result.get('coherence')
+    
+    coherence_check_status = 'passed' if passed else 'failed'
+    ethical_review_status = 'approved' if passed else 'requires_additional_review'
+    
+    if isinstance(coherence_value, (int, float)):
+        coherence_str = f"{coherence_value:.2%}"
+    else:
+        coherence_str = str(coherence_value)
+    
+    readiness = "Ready for merge." if passed else "Review required."
+    message = f"🌀 Agent Review: Coherence {coherence_str}. {readiness}"
+    
     return {
-        'status': 'reviewed',
-        'coherence_check': 'passed',
-        'ethical_review': 'approved',
-        'message': '🌀 Agent Review: Coherence >60%. Ready for merge.',
+        'status': 'reviewed' if passed else 'review_required',
+        'coherence_check': coherence_check_status,
+        'ethical_review': ethical_review_status,
+        'message': message,
+        'coherence_details': coherence_result,
         'vortex': VORTEX_MARKER
     }
 
