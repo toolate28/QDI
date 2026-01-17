@@ -80,8 +80,8 @@ jobs:
             // const prBody = sanitizeInput(
             //   context.payload.pull_request?.body || ''
             // );
-            // const message = `🌀 **Agent Review**: ` +
-            //   `Analyzing PR "${prTitle}"\n\n${safeMessage}`;
+            // const customMessage = `🌀 **Agent Review**: ` +
+            //   `Analyzing PR "${prTitle}"\n\n${message}`;
 
             github.rest.issues.createComment({
               issue_number: context.issue.number,
