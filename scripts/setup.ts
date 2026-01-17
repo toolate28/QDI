@@ -161,12 +161,23 @@ function checkTypeScriptConfig(): boolean {
  * Run tests to verify setup
  */
 async function runTests(): Promise<boolean> {
-  try {
-    await $({ cwd: ROOT_DIR })`bun test`.quiet();
-    return true;
-  } catch {
+  const result = await $({ cwd: ROOT_DIR })`bun test`.quiet().nothrow();
+
+  if (result.exitCode !== 0) {
+    log(
+      "error",
+      [
+        `Test command failed with exit code ${result.exitCode}.`,
+        result.stdout ? `STDOUT:\n${result.stdout}` : "",
+        result.stderr ? `STDERR:\n${result.stderr}` : "",
+      ]
+        .filter(Boolean)
+        .join("\n\n")
+    );
     return false;
   }
+
+  return true;
 }
 
 /**
