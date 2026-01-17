@@ -10,8 +10,13 @@ import json
 import sys
 from pathlib import Path
 
-# Add parent directory to path to import agent_skills
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Add parent directory to path to import agent_skills module
+# This is necessary since agent_skills.py is a standalone script at the repo root
+# and not part of an installed package
+repo_root = Path(__file__).parent.parent
+if str(repo_root) not in sys.path:
+    sys.path.insert(0, str(repo_root))
+
 import agent_skills
 
 
