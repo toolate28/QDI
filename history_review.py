@@ -529,6 +529,9 @@ def main() -> None:
             except PermissionError:
                 print(json.dumps({"error": f"Permission denied: {args.trace}", "vortex": VORTEX_MARKER}))
                 sys.exit(1)
+            except OSError as e:
+                print(json.dumps({"error": f"I/O error while accessing {args.trace}: {e}", "vortex": VORTEX_MARKER}))
+                sys.exit(1)
         result = review_history(trace_data)
     elif args.command == "surject":
         decision_data = {}
