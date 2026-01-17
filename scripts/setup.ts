@@ -143,14 +143,6 @@ async function setupAtomTrail(): Promise<boolean> {
       }
     }
 
-    // Add .gitkeep files to preserve directory structure
-    for (const dir of dirs.slice(1)) {
-      const gitkeep = join(dir, ".gitkeep");
-      if (!existsSync(gitkeep)) {
-        await writeFile(gitkeep, "");
-      }
-    }
-
     return true;
   } catch (error) {
     log("error", `Failed to setup ATOM trail: ${error}`);
