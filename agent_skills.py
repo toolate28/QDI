@@ -25,19 +25,25 @@ from typing import Optional, Tuple
 # In production, this would be measured via state tomography instead of a fixed stub value
 DEFAULT_SIMULATED_COHERENCE = 0.6
 
+# Maximum allowed qubit index to prevent resource exhaustion
+MAX_QUBIT_INDEX = 100
+
 # VORTEX marker for endpoint integration
 VORTEX_MARKER = "VORTEX::QDI::v1"
 
 
 def _parse_gate(raw_gate: str) -> Optional[Tuple[str, Tuple]]:
     """
-    Parse a single gate specification.
+    Parse a single gate specification with qubit index validation.
     
     Args:
         raw_gate: Gate string like 'h(0)' or 'cx(0,1)'
         
     Returns:
         Tuple (gate_type, qubits) or None for invalid/empty input
+        
+    Note:
+        Qubit indices must be within range [0, 100] to prevent resource exhaustion.
     """
     gate = raw_gate.strip().lower()
     if not gate:
@@ -46,15 +52,21 @@ def _parse_gate(raw_gate: str) -> Optional[Tuple[str, Tuple]]:
     try:
         if gate.startswith('h(') and gate.endswith(')'):
             qubit = int(gate[2:-1])
+            if qubit < 0 or qubit > MAX_QUBIT_INDEX:
+                return None
             return ('h', (qubit,))
         elif gate.startswith('x(') and gate.endswith(')'):
             qubit = int(gate[2:-1])
+            if qubit < 0 or qubit > MAX_QUBIT_INDEX:
+                return None
             return ('x', (qubit,))
         elif gate.startswith('cx(') and gate.endswith(')'):
             params = gate[3:-1].split(',')
             if len(params) != 2:
                 return None
             control, target = int(params[0].strip()), int(params[1].strip())
+            if control < 0 or control > MAX_QUBIT_INDEX or target < 0 or target > MAX_QUBIT_INDEX:
+                return None
             return ('cx', (control, target))
     except (ValueError, IndexError):
         return None
@@ -72,6 +84,46 @@ def simulate_circuit(circuit_str: Optional[str] = None) -> dict:
     Returns:
         dict with simulation results including VORTEX marker
     """
+    # Validate circuit string before attempting simulation
+    if circuit_str:
+        # Parse and validate gate sequence like "h(0); cx(0,1)"
+        for raw_gate in circuit_str.split(';'):
+            if not raw_gate.strip():
+                continue
+                
+            parsed = _parse_gate(raw_gate)
+            if parsed is None:
+                # Check if it's a qubit index out of range error
+                gate_str = raw_gate.strip().lower()
+                error_msg = f"Invalid gate syntax: {raw_gate.strip()}"
+                
+                # Try to detect if it's specifically a range error
+                try:
+                    if gate_str.startswith('h(') and gate_str.endswith(')'):
+                        qubit = int(gate_str[2:-1])
+                        if qubit < 0 or qubit > MAX_QUBIT_INDEX:
+                            error_msg = f"Qubit index {qubit} out of range. Must be between 0 and {MAX_QUBIT_INDEX}."
+                    elif gate_str.startswith('x(') and gate_str.endswith(')'):
+                        qubit = int(gate_str[2:-1])
+                        if qubit < 0 or qubit > MAX_QUBIT_INDEX:
+                            error_msg = f"Qubit index {qubit} out of range. Must be between 0 and {MAX_QUBIT_INDEX}."
+                    elif gate_str.startswith('cx(') and gate_str.endswith(')'):
+                        params = gate_str[3:-1].split(',')
+                        if len(params) == 2:
+                            control, target = int(params[0].strip()), int(params[1].strip())
+                            if control < 0 or control > MAX_QUBIT_INDEX:
+                                error_msg = f"Control qubit index {control} out of range. Must be between 0 and {MAX_QUBIT_INDEX}."
+                            elif target < 0 or target > MAX_QUBIT_INDEX:
+                                error_msg = f"Target qubit index {target} out of range. Must be between 0 and {MAX_QUBIT_INDEX}."
+                except (ValueError, IndexError):
+                    pass  # Keep the generic syntax error message
+                
+                return {
+                    'status': 'error',
+                    'error': error_msg,
+                    'vortex': VORTEX_MARKER
+                }
+    
     try:
         # Local imports keep qiskit/qiskit_aer as optional dependencies and
         # avoid import-time failures when these libraries are not installed.
@@ -88,7 +140,7 @@ def simulate_circuit(circuit_str: Optional[str] = None) -> dict:
             for raw_gate in circuit_str.split(';'):
                 parsed = _parse_gate(raw_gate)
                 if parsed is None:
-                    if raw_gate.strip():  # Non-empty but invalid
+                    if raw_gate.strip():  # Non-empty but invalid (shouldn't reach here due to validation above)
                         return {
                             'status': 'error',
                             'error': f"Invalid gate syntax: {raw_gate.strip()}",
