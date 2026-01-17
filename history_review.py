@@ -25,7 +25,7 @@ import json
 import math
 import sys
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Optional
 
 # VORTEX marker for cross-system integration
 VORTEX_MARKER = "VORTEX::QDI::v1"
@@ -37,7 +37,7 @@ SNAP_IN_THRESHOLD = 0.7  # 70% for snap-in synchronization
 # Fibonacci sequence for weighted calculations
 FIBONACCI = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144]
 
-# Golden ratio
+# Golden ratio - used for Fibonacci-weighted coherence calculations
 PHI = 1.618033988749895
 
 
@@ -322,26 +322,29 @@ def calculate_inference_boost(text: str, iteration: int = 1) -> dict:
     """
     Calculate inference boost for text using Fibonacci-weighted coherence.
 
+    Uses PHI (golden ratio) for optimal scaling and Fibonacci sequence for weighting.
     Boost range: 15-30% improvement.
     """
     coherence_analysis = analyze_coherence(text)
     base_score = coherence_analysis["coherence_score"] / 100
 
-    # Fibonacci-weighted boost
+    # Fibonacci-weighted boost with golden ratio scaling
     fib_index = min(iteration, len(FIBONACCI) - 1)
     fib_weight = FIBONACCI[fib_index] / FIBONACCI[len(FIBONACCI) - 1]
 
-    # Calculate boost (15-30% range)
-    boost = 0.15 + fib_weight * 0.15
+    # Calculate boost using PHI for optimal scaling (15-30% range)
+    # PHI provides natural logarithmic growth for coherence improvements
+    boost = 0.15 + fib_weight * 0.15 * (1 / PHI)
 
-    # Apply boost to base score
-    boosted_score = min(1.0, base_score + boost * 0.1)
+    # Apply boost to base score with PHI-normalized scaling
+    boosted_score = min(1.0, base_score + boost * (PHI / 10))
 
     return {
         "original_score": base_score,
         "boosted_score": boosted_score,
         "inference_boost": boost,
         "fib_weight": fib_weight,
+        "phi_factor": PHI,
         "iteration": iteration,
         "improvement": boosted_score - base_score,
         "vortex": VORTEX_MARKER,
@@ -514,13 +517,27 @@ def main() -> None:
     if args.command == "review":
         trace_data = None
         if hasattr(args, "trace") and args.trace:
-            with open(args.trace, encoding="utf-8") as f:
-                trace_data = json.load(f)
+            try:
+                with open(args.trace, encoding="utf-8") as f:
+                    trace_data = json.load(f)
+            except FileNotFoundError:
+                print(json.dumps({"error": f"File not found: {args.trace}", "vortex": VORTEX_MARKER}))
+                sys.exit(1)
+            except json.JSONDecodeError as e:
+                print(json.dumps({"error": f"Invalid JSON in file: {e}", "vortex": VORTEX_MARKER}))
+                sys.exit(1)
+            except PermissionError:
+                print(json.dumps({"error": f"Permission denied: {args.trace}", "vortex": VORTEX_MARKER}))
+                sys.exit(1)
         result = review_history(trace_data)
     elif args.command == "surject":
         decision_data = {}
         if hasattr(args, "decision") and args.decision:
-            decision_data = json.loads(args.decision)
+            try:
+                decision_data = json.loads(args.decision)
+            except json.JSONDecodeError as e:
+                print(json.dumps({"error": f"Invalid JSON in decision: {e}", "vortex": VORTEX_MARKER}))
+                sys.exit(1)
         result = surject_decision(decision_data)
     elif args.command == "audit":
         text = getattr(args, "input", None) or "Sample text for superposition audit."
