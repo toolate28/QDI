@@ -63,7 +63,9 @@ def _get_atom_counter(atom_type: str) -> int:
     if counter_file.exists():
         try:
             counter = int(counter_file.read_text().strip()) + 1
-        except ValueError:
+        except ValueError as e:
+            # Log error and reset counter if file is corrupted
+            print(f"Warning: Counter file corrupted ({counter_file}): {e}. Resetting to 1.", file=sys.stderr)
             counter = 1
     
     counter_file.write_text(str(counter))
@@ -88,6 +90,8 @@ def _generate_atom_tag(atom_type: str, description: str) -> str:
     slug = description.lower()
     slug = ''.join(c if c.isalnum() or c == '-' else '-' for c in slug)
     slug = '-'.join(filter(None, slug.split('-')))[:50]
+    # Ensure slug doesn't start or end with hyphens
+    slug = slug.strip('-')
     
     return f"ATOM-{atom_type}-{date_str}-{counter:03d}-{slug}"
 
