@@ -52,6 +52,7 @@ export interface QuantumAIHybridAlgorithm {
 
 /**
  * Default coherence baseline (70% as specified)
+ * Note: This is in 0-100 scale to match wave-toolkit's coherence_score output
  */
 export const COHERENCE_BASELINE = 70;
 

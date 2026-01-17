@@ -29,6 +29,9 @@ from typing import Optional, Tuple
 # In production, this would be measured via state tomography instead of a fixed stub value
 DEFAULT_SIMULATED_COHERENCE = 0.6
 
+# Maximum allowed qubit index to prevent resource exhaustion
+MAX_QUBIT_INDEX = 100
+
 # VORTEX marker for endpoint integration
 VORTEX_MARKER = "VORTEX::QDI::v1"
 
@@ -152,37 +155,104 @@ def _create_atom_decision(
     return decision
 
 
+def _extract_qubit_indices(gate_str: str) -> Optional[Union[Tuple[int], Tuple[int, int]]]:
+    """
+    Extract qubit indices from a gate string without validation.
+    
+    Args:
+        gate_str: Lowercase gate string like 'h(0)' or 'cx(0,1)'
+        
+    Returns:
+        Tuple of qubit indices or None if parsing fails
+    """
+    try:
+        if gate_str.startswith('h(') and gate_str.endswith(')'):
+            return (int(gate_str[2:-1]),)
+        elif gate_str.startswith('x(') and gate_str.endswith(')'):
+            return (int(gate_str[2:-1]),)
+        elif gate_str.startswith('cx(') and gate_str.endswith(')'):
+            params = gate_str[3:-1].split(',')
+            if len(params) == 2:
+                return (int(params[0].strip()), int(params[1].strip()))
+    except (ValueError, IndexError):
+        pass
+    return None
+
+
+def _validate_qubit_range(qubits: Union[Tuple[int], Tuple[int, int]]) -> bool:
+    """
+    Validate that all qubit indices are within the allowed range.
+    
+    Args:
+        qubits: Tuple of qubit indices
+        
+    Returns:
+        True if all indices are valid, False otherwise
+    """
+    return all(0 <= q <= MAX_QUBIT_INDEX for q in qubits)
+
+
+def _get_range_error_message(qubits: Union[Tuple[int], Tuple[int, int]]) -> str:
+    """
+    Generate a descriptive error message for out-of-range qubit indices.
+    
+    Args:
+        qubits: Tuple of qubit indices
+        
+    Returns:
+        Error message describing which qubit index is out of range
+    """
+    if len(qubits) == 1:
+        # Single-qubit gate
+        return f"Qubit index {qubits[0]} out of range. Must be between 0 and {MAX_QUBIT_INDEX}."
+    elif len(qubits) == 2:
+        # Two-qubit gate
+        control, target = qubits
+        if control < 0 or control > MAX_QUBIT_INDEX:
+            return f"Control qubit index {control} out of range. Must be between 0 and {MAX_QUBIT_INDEX}."
+        elif target < 0 or target > MAX_QUBIT_INDEX:
+            return f"Target qubit index {target} out of range. Must be between 0 and {MAX_QUBIT_INDEX}."
+    return f"Qubit indices out of range. Must be between 0 and {MAX_QUBIT_INDEX}."
+
+
 def _parse_gate(raw_gate: str) -> Optional[Tuple[str, Tuple]]:
     """
-    Parse a single gate specification.
+    Parse a single gate specification with qubit index validation.
     
     Args:
         raw_gate: Gate string like 'h(0)' or 'cx(0,1)'
         
     Returns:
         Tuple (gate_type, qubits) or None for invalid/empty input
+        
+    Note:
+        Qubit indices must be within range [0, 100] to prevent resource exhaustion.
     """
     gate = raw_gate.strip().lower()
     if not gate:
         return None
     
-    try:
-        if gate.startswith('h(') and gate.endswith(')'):
-            qubit = int(gate[2:-1])
-            return ('h', (qubit,))
-        elif gate.startswith('x(') and gate.endswith(')'):
-            qubit = int(gate[2:-1])
-            return ('x', (qubit,))
-        elif gate.startswith('cx(') and gate.endswith(')'):
-            params = gate[3:-1].split(',')
-            if len(params) != 2:
-                return None
-            control, target = int(params[0].strip()), int(params[1].strip())
-            return ('cx', (control, target))
-    except (ValueError, IndexError):
+    # Determine gate type
+    gate_type = None
+    if gate.startswith('h(') and gate.endswith(')'):
+        gate_type = 'h'
+    elif gate.startswith('x(') and gate.endswith(')'):
+        gate_type = 'x'
+    elif gate.startswith('cx(') and gate.endswith(')'):
+        gate_type = 'cx'
+    else:
         return None
     
-    return None
+    # Extract and validate qubit indices
+    qubits = _extract_qubit_indices(gate)
+    if qubits is None:
+        return None
+    
+    # Validate range
+    if not _validate_qubit_range(qubits):
+        return None
+    
+    return (gate_type, qubits)
 
 
 def simulate_circuit(circuit_str: Optional[str] = None) -> dict:
@@ -195,6 +265,30 @@ def simulate_circuit(circuit_str: Optional[str] = None) -> dict:
     Returns:
         dict with simulation results including VORTEX marker
     """
+    # Validate circuit string before attempting simulation
+    # This ensures errors are caught even when Qiskit is not installed
+    if circuit_str:
+        for raw_gate in circuit_str.split(';'):
+            if not raw_gate.strip():
+                continue
+                
+            parsed = _parse_gate(raw_gate)
+            if parsed is None:
+                # Generate specific error message
+                gate_str = raw_gate.strip().lower()
+                error_msg = f"Invalid gate syntax: {raw_gate.strip()}"
+                
+                # Check if it's a range error vs syntax error
+                qubits = _extract_qubit_indices(gate_str)
+                if qubits is not None and not _validate_qubit_range(qubits):
+                    error_msg = _get_range_error_message(qubits)
+                
+                return {
+                    'status': 'error',
+                    'error': error_msg,
+                    'vortex': VORTEX_MARKER
+                }
+    
     try:
         # Local imports keep qiskit/qiskit_aer as optional dependencies and
         # avoid import-time failures when these libraries are not installed.
@@ -204,19 +298,17 @@ def simulate_circuit(circuit_str: Optional[str] = None) -> dict:
         
         if circuit_str:
             # Parse simple gate sequence like "h(0); cx(0,1)"
-            # First pass: determine number of qubits needed
+            # Gates have already been validated above
             max_qubit = 1
             parsed_gates = []
             
             for raw_gate in circuit_str.split(';'):
+                if not raw_gate.strip():
+                    continue
+                    
                 parsed = _parse_gate(raw_gate)
+                # This should not be None due to validation above, but check defensively
                 if parsed is None:
-                    if raw_gate.strip():  # Non-empty but invalid
-                        return {
-                            'status': 'error',
-                            'error': f"Invalid gate syntax: {raw_gate.strip()}",
-                            'vortex': VORTEX_MARKER
-                        }
                     continue
                 
                 gate_type, qubits = parsed

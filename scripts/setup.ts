@@ -16,6 +16,7 @@ import { $ } from "bun";
 import { existsSync, rmSync } from "fs";
 import { mkdir, writeFile } from "fs/promises";
 import { join, resolve } from "path";
+import { generateAtomTag, saveDecision } from "./atom-tag";
 
 const ROOT_DIR = join(import.meta.dir, "..");
 const ATOM_TRAIL_DIR = join(ROOT_DIR, ".atom-trail");
@@ -182,27 +183,17 @@ async function runTests(): Promise<boolean> {
 
 /**
  * Create initial ATOM decision for setup
- * Uses timestamp-based unique suffix to avoid counter conflicts
+ * Uses counter-based system from atom-tag.ts for consistency
  */
 async function recordSetupAtom(): Promise<boolean> {
   try {
-    const now = new Date();
-    const dateStr = now.toISOString().slice(0, 10).replace(/-/g, "");
-    // Use timestamp suffix for uniqueness (HHmmss format)
-    const timeStr = now.toISOString().slice(11, 19).replace(/:/g, "");
-    const tag = `ATOM-INIT-${dateStr}-${timeStr}-new-user-setup`;
-
-    const decision = {
-      atom_tag: tag,
-      type: "INIT",
-      description: "New user environment setup completed",
-      files: ["package.json", "tsconfig.json", ".atom-trail/"],
-      timestamp: now.toISOString(),
-      freshness: "fresh",
-    };
-
-    const decisionPath = join(ATOM_TRAIL_DIR, "decisions", `${tag}.json`);
-    await writeFile(decisionPath, JSON.stringify(decision, null, 2));
+    const tag = await generateAtomTag("INIT", "new user environment setup completed");
+    await saveDecision(
+      tag,
+      "INIT",
+      "New user environment setup completed",
+      ["package.json", "tsconfig.json", ".atom-trail/"]
+    );
 
     return true;
   } catch {
