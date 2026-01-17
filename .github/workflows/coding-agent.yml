@@ -3,13 +3,10 @@ name: QDI Coding Agent
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-  issues:
-    types: [opened, edited]
 
 permissions:
   contents: read
   pull-requests: write
-  issues: write
 
 jobs:
   ethical-review:
