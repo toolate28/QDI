@@ -24,7 +24,7 @@ jobs:
       result: ${{ steps.snap_detection.outputs.result }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -142,7 +142,7 @@ jobs:
 
       - name: Annotate snap-in on PR
         if: github.event_name == 'pull_request' && steps.snap_detection.outputs.snap_in == 'true'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const rawResult = `${{ steps.snap_detection.outputs.result }}`;
@@ -212,7 +212,7 @@ jobs:
 
       - name: Apply snap-in labels
         if: steps.snap_detection.outputs.snap_in == 'true' && github.event_name == 'pull_request'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const prNumber = context.payload.pull_request.number;
@@ -275,7 +275,7 @@ jobs:
     if: needs.detect-snap-in.outputs.snap_in == 'true'
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Generate orchard visualization
         run: |
