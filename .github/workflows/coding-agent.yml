@@ -23,7 +23,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install Dependencies
-        run: pip install qiskit
+        run: pip install 'qiskit>=0.45.0,<2.0.0'
 
       - name: Simulate Default Bell State Circuit
         id: simulate
