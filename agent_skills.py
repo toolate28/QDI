@@ -56,6 +56,42 @@ def _extract_qubit_indices(gate_str: str) -> Optional[Union[Tuple[int], Tuple[in
     return None
 
 
+def _validate_qubit_range(qubits: Union[Tuple[int], Tuple[int, int]]) -> bool:
+    """
+    Validate that all qubit indices are within the allowed range.
+    
+    Args:
+        qubits: Tuple of qubit indices
+        
+    Returns:
+        True if all indices are valid, False otherwise
+    """
+    return all(0 <= q <= MAX_QUBIT_INDEX for q in qubits)
+
+
+def _get_range_error_message(qubits: Union[Tuple[int], Tuple[int, int]]) -> str:
+    """
+    Generate a descriptive error message for out-of-range qubit indices.
+    
+    Args:
+        qubits: Tuple of qubit indices
+        
+    Returns:
+        Error message describing which qubit index is out of range
+    """
+    if len(qubits) == 1:
+        # Single-qubit gate
+        return f"Qubit index {qubits[0]} out of range. Must be between 0 and {MAX_QUBIT_INDEX}."
+    elif len(qubits) == 2:
+        # Two-qubit gate
+        control, target = qubits
+        if control < 0 or control > MAX_QUBIT_INDEX:
+            return f"Control qubit index {control} out of range. Must be between 0 and {MAX_QUBIT_INDEX}."
+        elif target < 0 or target > MAX_QUBIT_INDEX:
+            return f"Target qubit index {target} out of range. Must be between 0 and {MAX_QUBIT_INDEX}."
+    return f"Qubit indices out of range. Must be between 0 and {MAX_QUBIT_INDEX}."
+
+
 def _parse_gate(raw_gate: str) -> Optional[Tuple[str, Tuple]]:
     """
     Parse a single gate specification with qubit index validation.
@@ -90,9 +126,8 @@ def _parse_gate(raw_gate: str) -> Optional[Tuple[str, Tuple]]:
         return None
     
     # Validate range
-    for qubit in qubits:
-        if qubit < 0 or qubit > MAX_QUBIT_INDEX:
-            return None
+    if not _validate_qubit_range(qubits):
+        return None
     
     return (gate_type, qubits)
 
@@ -120,21 +155,11 @@ def simulate_circuit(circuit_str: Optional[str] = None) -> dict:
                 gate_str = raw_gate.strip().lower()
                 error_msg = f"Invalid gate syntax: {raw_gate.strip()}"
                 
-                # Use helper function to extract qubit indices and check if it's a range error
+                # Use helper functions to extract qubit indices and generate specific error
                 qubits = _extract_qubit_indices(gate_str)
-                if qubits is not None:
-                    # Successfully parsed gate, so it must be a range error
-                    if len(qubits) == 1:
-                        # Single-qubit gate
-                        if qubits[0] < 0 or qubits[0] > MAX_QUBIT_INDEX:
-                            error_msg = f"Qubit index {qubits[0]} out of range. Must be between 0 and {MAX_QUBIT_INDEX}."
-                    elif len(qubits) == 2:
-                        # Two-qubit gate
-                        control, target = qubits
-                        if control < 0 or control > MAX_QUBIT_INDEX:
-                            error_msg = f"Control qubit index {control} out of range. Must be between 0 and {MAX_QUBIT_INDEX}."
-                        elif target < 0 or target > MAX_QUBIT_INDEX:
-                            error_msg = f"Target qubit index {target} out of range. Must be between 0 and {MAX_QUBIT_INDEX}."
+                if qubits is not None and not _validate_qubit_range(qubits):
+                    # Successfully parsed gate but indices out of range
+                    error_msg = _get_range_error_message(qubits)
                 
                 return {
                     'status': 'error',
