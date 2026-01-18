@@ -188,15 +188,15 @@ qdi/
 ## 🤝 Contributing
 
 **Requirements:**
-    - Tests pass (`bun test`)
-    - No lint errors (`bun run lint`)
-    - PR description coherence ≥60%
+- Tests pass (`bun test`)
+- No lint errors (`bun run lint`)
+- PR description coherence ≥60%
 
 **Tips for high coherence:**
-    - Avoid circular reasoning
-    - Conclude expansions clearly
-    - Use connectives: therefore, moreover, consequently
-    - Increase vocabulary diversity
+- Avoid circular reasoning
+- Conclude expansions clearly
+- Use connectives: therefore, moreover, consequently
+- Increase vocabulary diversity
 
 ## Coding Agent
 
