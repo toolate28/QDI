@@ -102,18 +102,11 @@ async function installDependencies(force: boolean): Promise<boolean> {
     const nodeModulesPath = join(ROOT_DIR, "node_modules");
     if (force) {
       log("step", "Force reinstalling dependencies...");
-      // Validate path before removal for security
-      // Ensure the resolved path is within the project directory
-      const resolvedNodeModules = resolve(nodeModulesPath);
-      const resolvedRoot = resolve(ROOT_DIR);
-      const expectedPath = resolve(resolvedRoot, "node_modules");
-      
-      // Check that the resolved path exactly matches the expected node_modules path
-      // This prevents path traversal attacks (e.g., /etc/node_modules)
-      const isValidPath = resolvedNodeModules === expectedPath;
-      
-      if (existsSync(nodeModulesPath) && isValidPath) {
-        rmSync(nodeModulesPath, { recursive: true, force: true });
+      // Validate path before removal for safety - ensure it resolves to expected location
+      const resolvedPath = resolve(nodeModulesPath);
+      const expectedPath = resolve(ROOT_DIR, "node_modules");
+      if (existsSync(resolvedPath) && resolvedPath === expectedPath) {
+        rmSync(resolvedPath, { recursive: true, force: true });
       }
       await $`cd ${ROOT_DIR} && bun install`.quiet();
     } else {
