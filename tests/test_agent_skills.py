@@ -393,7 +393,7 @@ class TestCascadeIntegration:
         assert decision_file.exists()
         
         # Verify file content
-        with open(decision_file, 'r') as f:
+        with open(decision_file, 'r', encoding='utf-8') as f:
             file_decision = json.load(f)
         
         assert file_decision['atom_tag'] == atom_tag
