@@ -22,7 +22,7 @@ import json
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 # Default simulated coherence aligned with the '>60%' workflow threshold
 # In production, this would be measured via state tomography instead of a fixed stub value
