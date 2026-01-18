@@ -311,6 +311,116 @@ class TestCascadeIntegration:
         
         result = agent_skills.cascade_integration("test body")
         assert result['vortex'] == agent_skills.VORTEX_MARKER
+    
+    def test_atom_decision_present(self):
+        """Test that ATOM decision is present in result"""
+        result = agent_skills.cascade_integration("quantum provenance test")
+        
+        assert 'atom_decision' in result
+        assert isinstance(result['atom_decision'], dict)
+    
+    def test_atom_tag_present(self):
+        """Test that ATOM tag is present in result"""
+        result = agent_skills.cascade_integration("ethical review test")
+        
+        assert 'atom_tag' in result
+        assert isinstance(result['atom_tag'], str)
+        assert result['atom_tag'].startswith('ATOM-')
+    
+    def test_atom_decision_structure(self):
+        """Test that ATOM decision has correct structure"""
+        result = agent_skills.cascade_integration("quantum coherence test")
+        
+        decision = result['atom_decision']
+        
+        # Verify required fields
+        assert 'atom_tag' in decision
+        assert 'type' in decision
+        assert 'description' in decision
+        assert 'timestamp' in decision
+        assert 'files' in decision
+        assert 'tags' in decision
+        assert 'freshness' in decision
+        assert 'verified' in decision
+        
+        # Verify field types and values
+        assert decision['type'] == 'VERIFY'
+        assert isinstance(decision['description'], str)
+        assert isinstance(decision['timestamp'], str)
+        assert isinstance(decision['files'], list)
+        assert isinstance(decision['tags'], list)
+        assert decision['freshness'] == 'fresh'
+        assert decision['verified'] is False
+    
+    def test_atom_decision_tags_include_keywords(self):
+        """Test that ATOM decision tags include detected keywords"""
+        result = agent_skills.cascade_integration("quantum provenance ethical test")
+        
+        decision = result['atom_decision']
+        tags = decision['tags']
+        
+        # Base tags should always be present
+        assert 'cascade' in tags
+        assert 'provenance' in tags
+        assert 'ethical-review' in tags
+        
+        # Keywords found should be in tags
+        assert 'quantum' in tags
+        assert 'ethical' in tags
+    
+    def test_atom_trail_file_created(self, tmp_path, monkeypatch):
+        """Test that ATOM trail decision file is created"""
+        # Use temporary directory for ATOM trail
+        atom_trail_dir = tmp_path / ".atom-trail"
+        atom_counters_dir = atom_trail_dir / "counters"
+        atom_decisions_dir = atom_trail_dir / "decisions"
+        
+        # Monkey patch the ATOM trail directories
+        monkeypatch.setattr(agent_skills, 'ATOM_TRAIL_DIR', atom_trail_dir)
+        monkeypatch.setattr(agent_skills, 'ATOM_COUNTERS_DIR', atom_counters_dir)
+        monkeypatch.setattr(agent_skills, 'ATOM_DECISIONS_DIR', atom_decisions_dir)
+        
+        result = agent_skills.cascade_integration("test body")
+        
+        # Verify directories were created
+        assert atom_trail_dir.exists()
+        assert atom_counters_dir.exists()
+        assert atom_decisions_dir.exists()
+        
+        # Verify decision file was created
+        atom_tag = result['atom_tag']
+        decision_file = atom_decisions_dir / f"{atom_tag}.json"
+        assert decision_file.exists()
+        
+        # Verify file content
+        import json
+        with open(decision_file, 'r') as f:
+            file_decision = json.load(f)
+        
+        assert file_decision['atom_tag'] == atom_tag
+        assert file_decision['type'] == 'VERIFY'
+    
+    def test_atom_tag_format(self):
+        """Test that ATOM tag follows correct format"""
+        result = agent_skills.cascade_integration("test")
+        
+        atom_tag = result['atom_tag']
+        
+        # Format: ATOM-TYPE-YYYYMMDD-NNN-description
+        parts = atom_tag.split('-')
+        assert len(parts) >= 5  # At least 5 parts
+        assert parts[0] == 'ATOM'
+        assert parts[1] == 'VERIFY'
+        assert len(parts[2]) == 8  # YYYYMMDD
+        assert parts[3].isdigit()  # Counter
+        assert len(parts[3]) == 3  # Three-digit counter
+    
+    def test_atom_decision_consistency(self):
+        """Test that atom_decision and atom_tag are consistent"""
+        result = agent_skills.cascade_integration("consistency test")
+        
+        # The atom_tag in result should match the one in atom_decision
+        assert result['atom_tag'] == result['atom_decision']['atom_tag']
 
 
 class TestReviewPR:
