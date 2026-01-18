@@ -495,5 +495,237 @@ class TestErrorHandling:
         assert isinstance(result, dict)
 
 
+class TestQubitRangeValidation:
+    """Test qubit index validation to prevent resource exhaustion"""
+    
+    def test_valid_single_qubit_gate(self):
+        """Test that valid single-qubit gate indices are accepted"""
+        result = agent_skills.simulate_circuit("h(0)")
+        assert result['status'] == 'simulated'
+        
+        result = agent_skills.simulate_circuit("h(50)")
+        assert result['status'] == 'simulated'
+        
+        result = agent_skills.simulate_circuit("h(100)")
+        assert result['status'] == 'simulated'
+    
+    def test_valid_two_qubit_gate(self):
+        """Test that valid two-qubit gate indices are accepted"""
+        result = agent_skills.simulate_circuit("cx(0,1)")
+        assert result['status'] == 'simulated'
+        
+        result = agent_skills.simulate_circuit("cx(50,51)")
+        assert result['status'] == 'simulated'
+        
+        result = agent_skills.simulate_circuit("cx(99,100)")
+        assert result['status'] == 'simulated'
+    
+    def test_single_qubit_below_range(self):
+        """Test that qubit index below 0 is rejected"""
+        result = agent_skills.simulate_circuit("h(-1)")
+        assert result['status'] == 'error'
+        assert 'out of range' in result['error']
+        assert '-1' in result['error']
+        assert 'Must be between 0 and 100' in result['error']
+    
+    def test_single_qubit_above_range(self):
+        """Test that qubit index above MAX_QUBIT_INDEX is rejected"""
+        result = agent_skills.simulate_circuit("h(101)")
+        assert result['status'] == 'error'
+        assert 'out of range' in result['error']
+        assert '101' in result['error']
+        assert 'Must be between 0 and 100' in result['error']
+    
+    def test_two_qubit_control_below_range(self):
+        """Test that control qubit below 0 is rejected"""
+        result = agent_skills.simulate_circuit("cx(-1,0)")
+        assert result['status'] == 'error'
+        assert 'out of range' in result['error']
+        assert 'Control qubit' in result['error']
+        assert '-1' in result['error']
+    
+    def test_two_qubit_control_above_range(self):
+        """Test that control qubit above MAX_QUBIT_INDEX is rejected"""
+        result = agent_skills.simulate_circuit("cx(101,0)")
+        assert result['status'] == 'error'
+        assert 'out of range' in result['error']
+        assert 'Control qubit' in result['error']
+        assert '101' in result['error']
+    
+    def test_two_qubit_target_below_range(self):
+        """Test that target qubit below 0 is rejected"""
+        result = agent_skills.simulate_circuit("cx(0,-1)")
+        assert result['status'] == 'error'
+        assert 'out of range' in result['error']
+        assert 'Target qubit' in result['error']
+        assert '-1' in result['error']
+    
+    def test_two_qubit_target_above_range(self):
+        """Test that target qubit above MAX_QUBIT_INDEX is rejected"""
+        result = agent_skills.simulate_circuit("cx(0,101)")
+        assert result['status'] == 'error'
+        assert 'out of range' in result['error']
+        assert 'Target qubit' in result['error']
+        assert '101' in result['error']
+    
+    def test_very_large_qubit_index(self):
+        """Test that extremely large qubit indices are rejected"""
+        result = agent_skills.simulate_circuit("h(10000)")
+        assert result['status'] == 'error'
+        assert 'out of range' in result['error']
+        assert '10000' in result['error']
+    
+    def test_multiple_gates_with_invalid_qubit(self):
+        """Test that circuit with one invalid qubit is rejected"""
+        result = agent_skills.simulate_circuit("h(0); h(101); x(1)")
+        assert result['status'] == 'error'
+        assert 'out of range' in result['error']
+    
+    def test_boundary_values(self):
+        """Test boundary values for qubit indices"""
+        # Test exact boundaries
+        result = agent_skills.simulate_circuit("h(0)")
+        assert result['status'] == 'simulated'
+        
+        result = agent_skills.simulate_circuit("h(100)")
+        assert result['status'] == 'simulated'
+        
+        # Test just outside boundaries
+        result = agent_skills.simulate_circuit("h(-1)")
+        assert result['status'] == 'error'
+        
+        result = agent_skills.simulate_circuit("h(101)")
+        assert result['status'] == 'error'
+
+
+class TestATOMDecisionFunctionality:
+    """Test ATOM trail provenance tracking functionality"""
+    
+    def test_cascade_integration_creates_atom_decision(self):
+        """Test that cascade_integration creates ATOM decision"""
+        result = agent_skills.cascade_integration("provenance quantum ethical")
+        
+        # Check that ATOM decision fields are present
+        assert 'atom_decision' in result
+        assert 'atom_tag' in result
+        
+        # Verify ATOM decision structure
+        decision = result['atom_decision']
+        assert 'atom_tag' in decision
+        assert 'type' in decision
+        assert 'description' in decision
+        assert 'timestamp' in decision
+        assert 'files' in decision
+        assert 'tags' in decision
+        assert 'freshness' in decision
+        assert 'verified' in decision
+    
+    def test_atom_decision_type_is_verify(self):
+        """Test that cascade ATOM decisions have type VERIFY"""
+        result = agent_skills.cascade_integration("test")
+        decision = result['atom_decision']
+        assert decision['type'] == 'VERIFY'
+    
+    def test_atom_decision_includes_keyword_count(self):
+        """Test that ATOM decision description includes keyword count"""
+        result = agent_skills.cascade_integration("provenance quantum ethical")
+        decision = result['atom_decision']
+        assert '3 ethical keywords' in decision['description']
+        
+        result = agent_skills.cascade_integration("no keywords here")
+        decision = result['atom_decision']
+        assert '0 ethical keywords' in decision['description']
+    
+    def test_atom_decision_tags_include_found_keywords(self):
+        """Test that ATOM decision tags include found keywords"""
+        result = agent_skills.cascade_integration("provenance quantum")
+        decision = result['atom_decision']
+        
+        # Should include base tags plus found keywords
+        assert 'cascade' in decision['tags']
+        assert 'provenance' in decision['tags']
+        assert 'ethical-review' in decision['tags']
+        assert 'quantum' in decision['tags']
+    
+    def test_atom_tag_format(self):
+        """Test that ATOM tag follows correct format: ATOM-TYPE-YYYYMMDD-NNN-description"""
+        result = agent_skills.cascade_integration("test")
+        atom_tag = result['atom_tag']
+        
+        # Check format
+        parts = atom_tag.split('-')
+        assert parts[0] == 'ATOM'
+        assert parts[1] == 'VERIFY'
+        # parts[2] should be YYYYMMDD
+        assert len(parts[2]) == 8
+        assert parts[2].isdigit()
+        # parts[3] should be NNN (counter)
+        assert len(parts[3]) == 3
+        assert parts[3].isdigit()
+        # parts[4+] should be slugified description
+        assert len(parts) >= 5
+    
+    def test_atom_decision_timestamp_format(self):
+        """Test that ATOM decision timestamp is ISO format"""
+        result = agent_skills.cascade_integration("test")
+        decision = result['atom_decision']
+        
+        # Check ISO format timestamp
+        timestamp = decision['timestamp']
+        assert 'T' in timestamp
+        # Should be parseable as ISO format
+        from datetime import datetime
+        datetime.fromisoformat(timestamp)
+    
+    def test_atom_decision_freshness_and_verified(self):
+        """Test that new ATOM decisions are marked fresh and unverified"""
+        result = agent_skills.cascade_integration("test")
+        decision = result['atom_decision']
+        
+        assert decision['freshness'] == 'fresh'
+        assert decision['verified'] == False
+    
+    def test_atom_decision_files_field(self):
+        """Test that ATOM decision includes files field"""
+        result = agent_skills.cascade_integration("test")
+        decision = result['atom_decision']
+        
+        assert isinstance(decision['files'], list)
+        assert 'pr_body' in decision['files']
+    
+    def test_atom_trail_directory_created(self):
+        """Test that ATOM trail directories are created"""
+        from pathlib import Path
+        
+        # Trigger ATOM decision creation
+        agent_skills.cascade_integration("test")
+        
+        # Check directories exist
+        assert Path(".atom-trail").exists()
+        assert Path(".atom-trail/counters").exists()
+        assert Path(".atom-trail/decisions").exists()
+    
+    def test_atom_decision_persisted_to_file(self):
+        """Test that ATOM decision is persisted to JSON file"""
+        import json
+        from pathlib import Path
+        
+        result = agent_skills.cascade_integration("test")
+        atom_tag = result['atom_tag']
+        
+        # Check that decision file exists
+        decision_file = Path(".atom-trail/decisions") / f"{atom_tag}.json"
+        assert decision_file.exists()
+        
+        # Verify file content matches decision
+        with open(decision_file, 'r') as f:
+            persisted = json.load(f)
+        
+        assert persisted['atom_tag'] == atom_tag
+        assert persisted['type'] == 'VERIFY'
+        assert 'description' in persisted
+        assert 'timestamp' in persisted
+
+
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])
