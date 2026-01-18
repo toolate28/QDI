@@ -9,7 +9,7 @@ import {
   runVortexCheck,
   createVortexPayload,
   formatVortexReport,
-  fibonacciCoherenceBoost,
+  applyFibonacciWeightedBoost,
   type VortexNode,
   type VortexConfig,
   type VortexResult,
@@ -473,10 +473,10 @@ describe('formatVortexReport', () => {
   });
 });
 
-describe('fibonacciCoherenceBoost', () => {
+describe('applyFibonacciWeightedBoost', () => {
   test('should boost coherence at iteration 0', () => {
     const baseCoherence = 0.5;
-    const boosted = fibonacciCoherenceBoost(baseCoherence, 0);
+    const boosted = applyFibonacciWeightedBoost(baseCoherence, 0);
 
     expect(boosted).toBeGreaterThanOrEqual(baseCoherence);
     expect(boosted).toBeLessThanOrEqual(1);
@@ -484,9 +484,9 @@ describe('fibonacciCoherenceBoost', () => {
 
   test('should boost coherence at higher iterations', () => {
     const baseCoherence = 0.6;
-    const boost1 = fibonacciCoherenceBoost(baseCoherence, 1);
-    const boost2 = fibonacciCoherenceBoost(baseCoherence, 2);
-    const boost3 = fibonacciCoherenceBoost(baseCoherence, 5);
+    const boost1 = applyFibonacciWeightedBoost(baseCoherence, 1);
+    const boost2 = applyFibonacciWeightedBoost(baseCoherence, 2);
+    const boost3 = applyFibonacciWeightedBoost(baseCoherence, 5);
 
     expect(boost1).toBeGreaterThanOrEqual(baseCoherence);
     expect(boost2).toBeGreaterThanOrEqual(baseCoherence);
@@ -500,14 +500,14 @@ describe('fibonacciCoherenceBoost', () => {
 
   test('should cap boost at 1.0', () => {
     const baseCoherence = 0.95;
-    const boosted = fibonacciCoherenceBoost(baseCoherence, 10);
+    const boosted = applyFibonacciWeightedBoost(baseCoherence, 10);
 
     expect(boosted).toBe(1);
   });
 
   test('should handle low base coherence', () => {
     const baseCoherence = 0.1;
-    const boosted = fibonacciCoherenceBoost(baseCoherence, 3);
+    const boosted = applyFibonacciWeightedBoost(baseCoherence, 3);
 
     expect(boosted).toBeGreaterThan(baseCoherence);
     expect(boosted).toBeLessThanOrEqual(1);
@@ -515,7 +515,7 @@ describe('fibonacciCoherenceBoost', () => {
 
   test('should handle high iteration counts', () => {
     const baseCoherence = 0.5;
-    const boosted = fibonacciCoherenceBoost(baseCoherence, 100);
+    const boosted = applyFibonacciWeightedBoost(baseCoherence, 100);
 
     // Should be capped even with very high iterations
     expect(boosted).toBeGreaterThanOrEqual(baseCoherence);
@@ -526,8 +526,8 @@ describe('fibonacciCoherenceBoost', () => {
     const baseCoherence = 0.7;
     const iteration = 5;
 
-    const result1 = fibonacciCoherenceBoost(baseCoherence, iteration);
-    const result2 = fibonacciCoherenceBoost(baseCoherence, iteration);
+    const result1 = applyFibonacciWeightedBoost(baseCoherence, iteration);
+    const result2 = applyFibonacciWeightedBoost(baseCoherence, iteration);
 
     expect(result1).toBe(result2);
   });
@@ -535,9 +535,9 @@ describe('fibonacciCoherenceBoost', () => {
   test('should increase boost with higher iterations', () => {
     const baseCoherence = 0.5;
 
-    const boost1 = fibonacciCoherenceBoost(baseCoherence, 1);
-    const boost5 = fibonacciCoherenceBoost(baseCoherence, 5);
-    const boost10 = fibonacciCoherenceBoost(baseCoherence, 10);
+    const boost1 = applyFibonacciWeightedBoost(baseCoherence, 1);
+    const boost5 = applyFibonacciWeightedBoost(baseCoherence, 5);
+    const boost10 = applyFibonacciWeightedBoost(baseCoherence, 10);
 
     // Later iterations should generally give higher boosts (until cap)
     expect(boost5).toBeGreaterThanOrEqual(boost1);
@@ -546,7 +546,7 @@ describe('fibonacciCoherenceBoost', () => {
 
   test('should handle zero base coherence', () => {
     const baseCoherence = 0;
-    const boosted = fibonacciCoherenceBoost(baseCoherence, 5);
+    const boosted = applyFibonacciWeightedBoost(baseCoherence, 5);
 
     expect(boosted).toBeGreaterThanOrEqual(0);
     expect(boosted).toBeLessThanOrEqual(1);
@@ -554,10 +554,7 @@ describe('fibonacciCoherenceBoost', () => {
 
   test('should handle perfect base coherence', () => {
     const baseCoherence = 1.0;
-    if (typeof fibonacciCoherenceBoost !== 'function') {
-      throw new Error('fibonacciCoherenceBoost is not a function');
-    }
-    const boosted = fibonacciCoherenceBoost(baseCoherence, 5);
+    const boosted = applyFibonacciWeightedBoost(baseCoherence, 5);
 
     // Should remain at 1.0
     expect(boosted).toBe(1);
