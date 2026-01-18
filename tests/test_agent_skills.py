@@ -6,7 +6,6 @@ and PR review functionality for the QDI agent script.
 """
 
 import pytest
-import json
 import sys
 from pathlib import Path
 
