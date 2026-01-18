@@ -9,6 +9,32 @@ Emergent quality is maintained at >60% via isomorphic Fibonacci patterns:
 
 ## Agent Setup
 
+### Automated Setup Script
+
+The repository includes an automated setup script (`scripts/setup.ts`) that streamlines onboarding for new users and agents. This script automatically configures the development environment, installs dependencies, and sets up the ATOM provenance trail.
+
+**Usage**:
+```bash
+# Run full setup (recommended for first-time setup)
+bun run scripts/setup.ts
+
+# Check environment without making changes
+bun run scripts/setup.ts --check
+
+# Force reinstall dependencies
+bun run scripts/setup.ts --force
+```
+
+**What the setup script does**:
+- Verifies Bun installation (requires v1.0.0+)
+- Installs or updates project dependencies
+- Creates ATOM trail directories for provenance tracking
+- Validates TypeScript configuration
+- Runs test suite to verify setup
+- Records setup in ATOM trail for provenance
+
+### Manual Setup
+
 1. **Install Dependencies**:
    ```bash
    # Clone repo and install
@@ -48,12 +74,38 @@ Ethical and provenance-aware behavior (e.g., fairness metrics and ATOM trail tra
 
 ## Commands (Fibonacci Escalation)
 
+### agent_skills.py
+
 | Command | Description |
 |---------|-------------|
 | `simulate` | Run Qiskit circuit simulation, output measurement counts |
 | `check_coherence` | Measure coherence >60%, negate decoherence |
 | `review_pr` | Parse PR body, auto-generate review comments |
 | `cascade` | Integrate provenance with cascading PRs |
+
+### history_review.py (Vortex History Cascade)
+
+| Command | Description |
+|---------|-------------|
+| `review` | Review full history trace with surjection mappings |
+| `surject` | Map decision pole to quantum gate representation |
+| `audit` | Audit text for superposition readiness (>60% threshold) |
+| `boost` | Calculate Fibonacci-weighted inference boost (15-30%) |
+
+#### Usage Examples
+```bash
+# Review a history trace
+python history_review.py review --trace history.json
+
+# Surject a decision to quantum gates
+python history_review.py surject --decision '{"id": "d1", "pole_type": "doubt"}'
+
+# Audit text coherence
+python history_review.py audit --input "Your text here" --threshold 0.6
+
+# Calculate inference boost
+python history_review.py boost --input "Text to boost" --iteration 5
+```
 
 ## Maintenance Loops
 

@@ -10,6 +10,10 @@ import { AxAI, AxSignature, AxChainOfThought } from '@ax-llm/ax';
 /**
  * Coherence Interpreter Signature
  * Interprets wave analysis metrics and provides actionable insights.
+ * 
+ * Note: All metrics should be normalized to 0-1 scale:
+ * - curl, divergence, potential: Already in 0-1 scale from wave-toolkit
+ * - coherence_score: Must be normalized from 0-100 to 0-1 (divide by 100)
  */
 export const coherenceInterpreter = new AxSignature({
   name: 'CoherenceInterpreter',
@@ -18,7 +22,7 @@ export const coherenceInterpreter = new AxSignature({
     curl: 'number: Repetition metric (0-1)',
     divergence: 'number: Expansion metric (0-1)',
     potential: 'number: Undeveloped ideas metric (0-1)',
-    coherence_score: 'number: Overall coherence (0-1)',
+    coherence_score: 'number: Overall coherence normalized to 0-1 scale (divide wave-toolkit score by 100)',
     context: 'string: The analyzed text or document reference'
   },
   output: {
@@ -95,6 +99,13 @@ export const waveAnalyzer = new AxSignature({
 
 /**
  * Create optimized program for coherence interpretation
+ * 
+ * @param ai - The AI instance to use for generation
+ * @param waveResults - Wave analysis results with normalized metrics
+ * @param waveResults.coherence_score - Must be normalized to 0-1 scale (not 0-100)
+ * 
+ * Note: If using wave-toolkit's analyzeWave(), divide coherence_score by 100
+ * before passing to this function to match the expected 0-1 scale.
  */
 export async function interpretCoherence(
   ai: AxAI,
