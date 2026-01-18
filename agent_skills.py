@@ -372,7 +372,6 @@ def simulate_circuit(circuit_str: Optional[str] = None) -> dict:
         return {
             'status': 'error',
             'error': str(e),
-            'passed': False,
             'vortex': VORTEX_MARKER
         }
 
