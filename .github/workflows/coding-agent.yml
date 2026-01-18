@@ -57,17 +57,6 @@ jobs:
             const message = '🌀 **Agent Review**: Coherence >60%. ' +
               'Ethical quantum sims validated. Ready for merge.';
 
-            // Example of safely using user-controlled data
-            // (for future extensions):
-            // const prTitle = sanitizeInput(
-            //   context.payload.pull_request?.title || ''
-            // );
-            // const prBody = sanitizeInput(
-            //   context.payload.pull_request?.body || ''
-            // );
-            // const customMessage = `🌀 **Agent Review**: ` +
-            //   `Analyzing PR "${prTitle}"\n\n${message}`;
-
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
