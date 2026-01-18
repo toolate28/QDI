@@ -571,6 +571,154 @@ class TestDefaultCoherence:
         assert result['coherence'] == agent_skills.DEFAULT_SIMULATED_COHERENCE
 
 
+class TestQubitRangeValidation:
+    """Test qubit range validation to prevent resource exhaustion"""
+    
+    def test_valid_qubit_index_zero(self):
+        """Test qubit index 0 is valid"""
+        result = agent_skills.simulate_circuit("h(0)")
+        assert result['status'] in ['success', 'simulated']
+    
+    def test_valid_qubit_index_max(self):
+        """Test qubit index 100 (MAX_QUBIT_INDEX) is valid"""
+        result = agent_skills.simulate_circuit("h(100)")
+        assert result['status'] in ['success', 'simulated']
+    
+    def test_valid_qubit_index_middle(self):
+        """Test qubit index in middle of range is valid"""
+        result = agent_skills.simulate_circuit("h(50)")
+        assert result['status'] in ['success', 'simulated']
+    
+    def test_invalid_qubit_index_negative(self):
+        """Test negative qubit index is rejected"""
+        result = agent_skills.simulate_circuit("h(-1)")
+        assert result['status'] == 'error'
+        assert 'error' in result
+        assert 'out of range' in result['error'].lower()
+        assert '-1' in result['error']
+    
+    def test_invalid_qubit_index_above_max(self):
+        """Test qubit index above MAX_QUBIT_INDEX is rejected"""
+        result = agent_skills.simulate_circuit("h(101)")
+        assert result['status'] == 'error'
+        assert 'error' in result
+        assert 'out of range' in result['error'].lower()
+        assert '101' in result['error']
+    
+    def test_invalid_qubit_index_far_above_max(self):
+        """Test very large qubit index is rejected"""
+        result = agent_skills.simulate_circuit("h(1000)")
+        assert result['status'] == 'error'
+        assert 'error' in result
+        assert 'out of range' in result['error'].lower()
+        assert '1000' in result['error']
+    
+    def test_x_gate_negative_qubit(self):
+        """Test X gate with negative qubit is rejected"""
+        result = agent_skills.simulate_circuit("x(-5)")
+        assert result['status'] == 'error'
+        assert 'error' in result
+        assert 'out of range' in result['error'].lower()
+    
+    def test_x_gate_above_max_qubit(self):
+        """Test X gate with qubit above MAX_QUBIT_INDEX is rejected"""
+        result = agent_skills.simulate_circuit("x(150)")
+        assert result['status'] == 'error'
+        assert 'error' in result
+        assert 'out of range' in result['error'].lower()
+    
+    def test_cx_gate_valid_qubits(self):
+        """Test CX gate with valid qubit indices"""
+        result = agent_skills.simulate_circuit("cx(0,1)")
+        assert result['status'] in ['success', 'simulated']
+    
+    def test_cx_gate_valid_at_max(self):
+        """Test CX gate with qubits at MAX_QUBIT_INDEX"""
+        result = agent_skills.simulate_circuit("cx(99,100)")
+        assert result['status'] in ['success', 'simulated']
+    
+    def test_cx_gate_invalid_control_negative(self):
+        """Test CX gate with negative control qubit is rejected"""
+        result = agent_skills.simulate_circuit("cx(-1,0)")
+        assert result['status'] == 'error'
+        assert 'error' in result
+        assert 'out of range' in result['error'].lower()
+        assert 'control' in result['error'].lower() or '-1' in result['error']
+    
+    def test_cx_gate_invalid_control_above_max(self):
+        """Test CX gate with control qubit above MAX_QUBIT_INDEX is rejected"""
+        result = agent_skills.simulate_circuit("cx(101,0)")
+        assert result['status'] == 'error'
+        assert 'error' in result
+        assert 'out of range' in result['error'].lower()
+        assert 'control' in result['error'].lower() or '101' in result['error']
+    
+    def test_cx_gate_invalid_target_negative(self):
+        """Test CX gate with negative target qubit is rejected"""
+        result = agent_skills.simulate_circuit("cx(0,-1)")
+        assert result['status'] == 'error'
+        assert 'error' in result
+        assert 'out of range' in result['error'].lower()
+        assert 'target' in result['error'].lower() or '-1' in result['error']
+    
+    def test_cx_gate_invalid_target_above_max(self):
+        """Test CX gate with target qubit above MAX_QUBIT_INDEX is rejected"""
+        result = agent_skills.simulate_circuit("cx(0,101)")
+        assert result['status'] == 'error'
+        assert 'error' in result
+        assert 'out of range' in result['error'].lower()
+        assert 'target' in result['error'].lower() or '101' in result['error']
+    
+    def test_cx_gate_both_qubits_invalid(self):
+        """Test CX gate with both qubits out of range"""
+        result = agent_skills.simulate_circuit("cx(-1,101)")
+        assert result['status'] == 'error'
+        assert 'error' in result
+        assert 'out of range' in result['error'].lower()
+    
+    def test_error_message_includes_max_value(self):
+        """Test error message includes MAX_QUBIT_INDEX value"""
+        result = agent_skills.simulate_circuit("h(200)")
+        assert result['status'] == 'error'
+        assert 'error' in result
+        assert '100' in result['error']  # MAX_QUBIT_INDEX
+    
+    def test_multiple_gates_first_invalid(self):
+        """Test circuit with first gate having invalid qubit"""
+        result = agent_skills.simulate_circuit("h(101); cx(0,1)")
+        assert result['status'] == 'error'
+        assert 'error' in result
+        assert 'out of range' in result['error'].lower()
+    
+    def test_multiple_gates_second_invalid(self):
+        """Test circuit with second gate having invalid qubit"""
+        result = agent_skills.simulate_circuit("h(0); cx(0,101)")
+        assert result['status'] == 'error'
+        assert 'error' in result
+        assert 'out of range' in result['error'].lower()
+    
+    def test_error_message_format_single_qubit(self):
+        """Test error message format for single-qubit gate"""
+        result = agent_skills.simulate_circuit("h(150)")
+        assert result['status'] == 'error'
+        expected_msg = "Qubit index 150 out of range. Must be between 0 and 100."
+        assert result['error'] == expected_msg
+    
+    def test_error_message_format_cx_control(self):
+        """Test error message format for CX gate with invalid control"""
+        result = agent_skills.simulate_circuit("cx(150,0)")
+        assert result['status'] == 'error'
+        expected_msg = "Control qubit index 150 out of range. Must be between 0 and 100."
+        assert result['error'] == expected_msg
+    
+    def test_error_message_format_cx_target(self):
+        """Test error message format for CX gate with invalid target"""
+        result = agent_skills.simulate_circuit("cx(0,150)")
+        assert result['status'] == 'error'
+        expected_msg = "Target qubit index 150 out of range. Must be between 0 and 100."
+        assert result['error'] == expected_msg
+
+
 class TestErrorHandling:
     """Test error handling in various scenarios"""
     
