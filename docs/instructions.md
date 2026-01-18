@@ -9,6 +9,32 @@ Emergent quality is maintained at >60% via isomorphic Fibonacci patterns:
 
 ## Agent Setup
 
+### Automated Setup Script
+
+The repository includes an automated setup script (`scripts/setup.ts`) that streamlines onboarding for new users and agents. This script automatically configures the development environment, installs dependencies, and sets up the ATOM provenance trail.
+
+**Usage**:
+```bash
+# Run full setup (recommended for first-time setup)
+bun run scripts/setup.ts
+
+# Check environment without making changes
+bun run scripts/setup.ts --check
+
+# Force reinstall dependencies
+bun run scripts/setup.ts --force
+```
+
+**What the setup script does**:
+- Verifies Bun installation (requires v1.0.0+)
+- Installs or updates project dependencies
+- Creates ATOM trail directories for provenance tracking
+- Validates TypeScript configuration
+- Runs test suite to verify setup
+- Records setup in ATOM trail for provenance
+
+### Manual Setup
+
 1. **Install Dependencies**:
    ```bash
    # Clone repo and install

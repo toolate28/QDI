@@ -90,7 +90,7 @@ SAIF loops back to KENL creating infinite improvement
 **3. Wave Analysis (Physics)**
 
 | Metric     | What It Detects     | Optimal
-|------------|---------------------|------------------------
+|------------|---------------------|--------
 | Curl       | Circular reasoning  | <0.3
 | Divergence | Expansion rate      | ~0.2 (golden ratio)
 | Potential  | Structure depth     | >0.6
@@ -124,7 +124,7 @@ When coherence hits 70%, the **waveform collapses**:
 Four tools that work together:
 
 | Package            | What It Does
-|--------------------|-------------------------------------------------------------------------------
+|--------------------|-----------------------------------------------------------------------------
 | **wave-toolkit**   | Analyzes text coherence using physics (curl, divergence, potential, entropy)
 | **atom-trail**     | Tracks every decision through phase gates (KENL → AWI → ATOM → SAIF → Spiral)
 | **ax-signatures**  | Optimizes LLM prompts for coherence
@@ -160,6 +160,7 @@ cat .vortex-logs/snap-in-*.json | jq '.coherence.coherence_score'
 ```
 
 **Tags applied automatically:**
+
 - Phase: `phase:KENL`, `phase:AWI`, `phase:ATOM`, `phase:SAIF`, `phase:Spiral`
 - Component: `pkg:wave-toolkit`, `pkg:atom-trail`, etc.
 - Quality: `coherence:high`, `coherence:review`, `coherence:low`
@@ -197,7 +198,33 @@ qdi/
 - Use connectives: therefore, moreover, consequently
 - Increase vocabulary diversity
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+## Coding Agent
+
+The repository includes a GitHub Actions-based coding agent for automated ethical review of PRs.
+
+### Agent Setup
+
+```bash
+# Install Python dependencies for quantum simulations
+pip install qiskit
+
+# Run agent skills locally
+python agent_skills.py simulate
+python agent_skills.py check_coherence --threshold 0.6
+```
+
+### Agent Commands
+
+| Command           | Description                            |
+|-------------------|----------------------------------------|
+| `simulate`        | Run Qiskit circuit simulation          |
+| `check_coherence` | Verify coherence threshold (>60%)      |
+| `cascade`         | Integrate provenance for cascading PRs |
+| `review_pr`       | Generate automated PR review           |
+
+See [docs/instructions.md](docs/instructions.md) for full agent documentation.
+
+## Feedback & Contributions
 
 ## 📚 Learn More
 

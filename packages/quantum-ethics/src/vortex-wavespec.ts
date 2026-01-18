@@ -9,6 +9,22 @@
  *
  * Emergent quality target: >60%
  * Fibonacci ratio: 1.618
+ * 
+ * === COHERENCE SCORE SCALE CONVENTION ===
+ * This module works with coherence scores in two scales:
+ * 
+ * 1. INPUT (from wave-toolkit): 0-100 scale
+ *    - analyzeWave() returns coherence_score in 0-100 range
+ *    - This is the "raw" score for human readability
+ * 
+ * 2. INTERNAL PROCESSING: 0-1 scale
+ *    - COHERENCE_THRESHOLD and other thresholds use 0-1 scale
+ *    - normalizeCoherenceScore() converts from 0-100 to 0-1
+ *    - VortexResult.coherenceScore is in 0-1 scale
+ *    - VortexCluster.coherence is in 0-1 scale
+ * 
+ * Always use normalizeCoherenceScore() when converting from wave-toolkit
+ * results to internal processing values.
  */
 
 import { type AtomDecision, createDecision } from "@spiralsafe/atom-trail";
@@ -21,17 +37,12 @@ import {
 
 // VORTEX Marker for cross-system integration
 export const VORTEX_MARKER = "VORTEX::QDI::v1";
-export const COHERENCE_THRESHOLD = 0.6; // 60% minimum for PASS
-
 /**
- * Coherence boost constants for different vortex types
- * Each vortex type receives a different boost to its coherence score
- * to reflect its relative importance in the system architecture
+ * Minimum coherence threshold for PASS status (0-1 scale)
+ * Note: This is in 0-1 scale. Wave-toolkit returns scores in 0-100 scale,
+ * so use normalizeCoherenceScore() to convert before comparison.
  */
-export const COHERENCE_BOOST_MONITORING = 0; // Base monitoring - no boost
-export const COHERENCE_BOOST_TESTING = 0.05; // Testing vortex - moderate boost for quality assurance
-export const COHERENCE_BOOST_PLANNING = 0.03; // Planning vortex - small boost for infrastructure planning
-export const COHERENCE_BOOST_CORE = 0.08; // Core vortex - highest boost for ethical/philosophical foundation
+export const COHERENCE_THRESHOLD = 0.6; // 60% minimum for PASS
 
 export interface VortexNode {
   name: string;
@@ -57,6 +68,7 @@ export interface VortexConfig {
 
 export interface VortexResult {
   timestamp: string;
+  /** Coherence score in 0-1 scale (normalized from wave-toolkit's 0-100 scale) */
   coherenceScore: number;
   emergentQuality: string;
   passed: boolean;
@@ -82,6 +94,7 @@ export interface VortexDashboardPayload {
 export interface VortexCluster {
   vortex_name: string;
   description: string;
+  /** Coherence score in 0-1 scale (normalized and possibly boosted) */
   coherence: number;
   components: string[];
   refinements: VortexRefinement[];
@@ -117,11 +130,37 @@ const DEFAULT_VORTEX_CONFIG: VortexConfig = {
 
 /**
  * Normalize coherence score from 0-100 scale to 0-1 scale
- * @param rawScore - The coherence score in 0-100 range
+ * 
+ * Note: wave-toolkit's analyzeWave() returns coherence_score in 0-100 scale
+ * for human readability. This function converts it to 0-1 scale for internal
+ * calculations and comparison with COHERENCE_THRESHOLD (which is in 0-1 scale).
+ * 
+ * @param rawScore - The coherence score in 0-100 range from wave-toolkit
  * @return Normalized score in 0-1 range, clamped to valid bounds
  */
 function normalizeCoherenceScore(rawScore: number): number {
   return Math.max(0, Math.min(1, rawScore / 100));
+}
+
+/**
+ * Vortex criticality levels determine coherence boost based on system importance.
+ * Higher criticality = greater coherence boost to ensure stability of critical subsystems.
+ */
+enum VortexCriticality {
+  MONITORING = 0, // Baseline - observational role, no boost needed
+  PLANNING = 3, // Infrastructure planning requires moderate stability
+  TESTING = 5, // Testing/compliance needs high reliability for audit integrity
+  CORE = 8, // Core ethics/philosophy requires maximum coherence for system integrity
+}
+
+/**
+ * Calculate coherence boost based on vortex criticality level.
+ * Formula: boost = criticality / 100
+ * This ensures critical vortexes maintain higher coherence thresholds
+ * while staying within the 0-1 normalized range.
+ */
+function calculateCoherenceBoost(criticality: VortexCriticality): number {
+  return criticality / 100;
 }
 
 /**
@@ -134,12 +173,22 @@ export function createVortexPayload(
   const cfg = { ...DEFAULT_VORTEX_CONFIG, ...config };
   const waveAnalysis = analyzeWave(analysisText);
 
+  const baseCoherence = normalizeCoherenceScore(waveAnalysis.coherence_score);
+
   const vortexes: VortexCluster[] = [
     {
-      vortex_name: 'MonitoringVortex',
-      description: 'Autonomous monitoring cluster – self-maintains coherence metrics',
-      coherence: Math.min(1, waveAnalysis.coherence_score / 100 + COHERENCE_BOOST_MONITORING),
-      components: ['CoherenceConstellation.tsx', 'SpectralAnalyzer.tsx', 'SessionMonitor.tsx'],
+      vortex_name: "MonitoringVortex",
+      description:
+        "Autonomous monitoring cluster – self-maintains coherence metrics",
+      coherence: Math.min(
+        1,
+        baseCoherence + calculateCoherenceBoost(VortexCriticality.MONITORING),
+      ),
+      components: [
+        "CoherenceConstellation.tsx",
+        "SpectralAnalyzer.tsx",
+        "SessionMonitor.tsx",
+      ],
       refinements: [
         {
           original: "CoherenceConstell.tsx",
@@ -151,10 +200,18 @@ export function createVortexPayload(
       ],
     },
     {
-      vortex_name: 'TestingVortex',
-      description: 'Autonomous testing/compliance – self-maintains audits/proofs',
-      coherence: Math.min(1, waveAnalysis.coherence_score / 100 + COHERENCE_BOOST_TESTING),
-      components: ['LoadTestingSimulator.tsx', 'ComplianceTracker.tsx', 'SortingHat.tsx'],
+      vortex_name: "TestingVortex",
+      description:
+        "Autonomous testing/compliance – self-maintains audits/proofs",
+      coherence: Math.min(
+        1,
+        baseCoherence + calculateCoherenceBoost(VortexCriticality.TESTING),
+      ),
+      components: [
+        "LoadTestingSimulator.tsx",
+        "ComplianceTracker.tsx",
+        "SortingHat.tsx",
+      ],
       refinements: [
         {
           original: "LoadTestingSimu.tsx",
@@ -165,10 +222,17 @@ export function createVortexPayload(
       ],
     },
     {
-      vortex_name: 'PlanningVortex',
-      description: 'Autonomous planning/infra – self-maintains transitions',
-      coherence: Math.min(1, waveAnalysis.coherence_score / 100 + COHERENCE_BOOST_PLANNING),
-      components: ['MigrationPlanner.tsx', 'HardwareBridge.tsx', 'TransitionTimeline.tsx'],
+      vortex_name: "PlanningVortex",
+      description: "Autonomous planning/infra – self-maintains transitions",
+      coherence: Math.min(
+        1,
+        baseCoherence + calculateCoherenceBoost(VortexCriticality.PLANNING),
+      ),
+      components: [
+        "MigrationPlanner.tsx",
+        "HardwareBridge.tsx",
+        "TransitionTimeline.tsx",
+      ],
       refinements: [
         {
           original: "MigrationPlanner.tsx",
@@ -179,10 +243,13 @@ export function createVortexPayload(
       ],
     },
     {
-      vortex_name: 'CoreVortex',
-      description: 'Autonomous core/philo – self-maintains ethics',
-      coherence: Math.min(1, waveAnalysis.coherence_score / 100 + COHERENCE_BOOST_CORE),
-      components: ['HopeSaucedPhilosophy.tsx', 'StakeholderHub.tsx'],
+      vortex_name: "CoreVortex",
+      description: "Autonomous core/philo – self-maintains ethics",
+      coherence: Math.min(
+        1,
+        baseCoherence + calculateCoherenceBoost(VortexCriticality.CORE),
+      ),
+      components: ["HopeSaucedPhilosophy.tsx", "StakeholderHub.tsx"],
       refinements: [
         {
           original: "HopeSaucedPhilo.tsx",
@@ -330,15 +397,17 @@ export function formatVortexReport(result: VortexResult): string {
 }
 
 /**
- * Calculate Fibonacci-weighted coherence boost
+ * Apply Fibonacci-weighted boost to coherence score
  */
-export function fibonacciCoherenceBoost(
+export function applyFibonacciWeightedBoost(
   baseCoherence: number,
   iteration: number,
 ): number {
+  // Ensure base coherence is within [0, 1] before applying boost
+  const normalizedBaseCoherence = Math.max(0, Math.min(1, baseCoherence));
   const fibIndex = Math.min(iteration, FIBONACCI.length - 1);
   const fibWeight = FIBONACCI[fibIndex] / FIBONACCI[FIBONACCI.length - 1];
-  return Math.min(1, baseCoherence + fibWeight * 0.1);
+  return Math.min(1, normalizedBaseCoherence + fibWeight * 0.1);
 }
 
 // Export for use in dashboard and endpoints
