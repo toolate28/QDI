@@ -554,6 +554,9 @@ describe('applyFibonacciWeightedBoost', () => {
 
   test('should handle perfect base coherence', () => {
     const baseCoherence = 1.0;
+    if (typeof applyFibonacciWeightedBoost !== 'function') {
+      throw new Error('applyFibonacciWeightedBoost is not a function');
+    }
     const boosted = applyFibonacciWeightedBoost(baseCoherence, 5);
 
     // Should remain at 1.0
