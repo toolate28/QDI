@@ -393,7 +393,6 @@ class TestCascadeIntegration:
         assert decision_file.exists()
         
         # Verify file content
-        import json
         with open(decision_file, 'r') as f:
             file_decision = json.load(f)
         
