@@ -19,11 +19,10 @@ Usage:
 
 import argparse
 import json
-import os
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union
 
 # Default simulated coherence aligned with the '>60%' workflow threshold
 # In production, this would be measured via state tomography instead of a fixed stub value
@@ -176,7 +175,7 @@ def _extract_qubit_indices(gate_str: str) -> Optional[Union[Tuple[int], Tuple[in
                 return (int(params[0].strip()), int(params[1].strip()))
     except (ValueError, IndexError):
         # Parsing failed (e.g., invalid integer or malformed indices); treat as no qubit indices.
-        return None
+        pass
     return None
 
 
