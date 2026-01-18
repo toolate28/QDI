@@ -175,7 +175,8 @@ def _extract_qubit_indices(gate_str: str) -> Optional[Union[Tuple[int], Tuple[in
             if len(params) == 2:
                 return (int(params[0].strip()), int(params[1].strip()))
     except (ValueError, IndexError):
-        pass
+        # Parsing failed (e.g., invalid integer or malformed indices); treat as no qubit indices.
+        return None
     return None
 
 
