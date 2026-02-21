@@ -1,0 +1,226 @@
+{
+  "main": {
+    "id": "8e216c932ebc701b",
+    "type": "split",
+    "children": [
+      {
+        "id": "85d9f651268cd6e4",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "40c68a41abcdecc6",
+            "type": "leaf",
+            "state": {
+              "type": "canvas",
+              "state": {
+                "file": "Untitled.canvas",
+                "viewState": {
+                  "x": -5310,
+                  "y": 5691.999787139881,
+                  "zoom": -4
+                }
+              },
+              "icon": "lucide-layout-dashboard",
+              "title": "Untitled"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "121b553ea174dc30",
+    "type": "split",
+    "children": [
+      {
+        "id": "7a76295ebaec772c",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "ab2cbbd9405c2a64",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "d4db798a560e780e",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "12d32ff7e8096b8e",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "32f1cfee18f70178",
+    "type": "split",
+    "children": [
+      {
+        "id": "4ec39df2d6621920",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "69ad7d167c86d0c4",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "CONTRIBUTING.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for CONTRIBUTING"
+            }
+          },
+          {
+            "id": "7f0020f802dcf139",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "CONTRIBUTING.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from CONTRIBUTING"
+            }
+          },
+          {
+            "id": "2425a71890077881",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "b5bf54a4dd62bedf",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "8f91eecfce6c0847",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "CONTRIBUTING.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of CONTRIBUTING"
+            }
+          },
+          {
+            "id": "71345090d91b13f7",
+            "type": "leaf",
+            "state": {
+              "type": "footnotes",
+              "state": {
+                "file": "Untitled.canvas"
+              },
+              "icon": "lucide-file-signature",
+              "title": "Footnotes"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "workspaces:Manage workspace layouts": false,
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false,
+      "markdown-importer:Open format converter": false
+    }
+  },
+  "active": "ab2cbbd9405c2a64",
+  "lastOpenFiles": [
+    "docs/diagrams/workflow-visualization.md",
+    "SPIRAL-SPEC.md",
+    "README.md",
+    "IDEAL-SPEC.md",
+    "packages/quantum-ethics/README.md",
+    "Untitled.canvas",
+    "docs/METHODOLOGY.md",
+    "docs/instructions.md",
+    "docs/diagrams/05-multi-ai-orchestration.md",
+    "docs/diagrams/04-fibonacci-weighting.md",
+    "Untitled.base",
+    "docs/BORING_COMPANY_BID.md",
+    "docs/diagrams/01-vortex-cascade-topology.md",
+    "docs/diagrams/03-wave-atom-sphinx-flow.md",
+    "docs/diagrams/02-sydney-tunnel-route.md",
+    "CONTRIBUTING.md",
+    "packages/quantum-ethics/IMPLEMENTATION.md",
+    "docs/VERIFICATION.md",
+    "docs/diagrams/README.md",
+    "docs/diagrams/06-sphinx-five-gates.md"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+	"nodes":[
+		{"id":"f652c3fd491cb054","type":"file","file":"packages/quantum-ethics/README.md","x":-1540,"y":0,"width":600,"height":28960},
+		{"id":"18b513b8ee746f17","type":"file","file":"packages/quantum-ethics/IMPLEMENTATION.md","x":-340,"y":0,"width":600,"height":8520},
+		{"id":"cdb6432e56f78867","type":"file","file":"SPIRAL-SPEC.md","x":-2760,"y":0,"width":600,"height":21280},
+		{"id":"15d589244e48a199","type":"file","file":"IDEAL-SPEC.md","x":-3920,"y":0,"width":640,"height":29240},
+		{"id":"7d807ab886d8375d","type":"file","file":"docs/diagrams/workflow-visualization.md","x":-5280,"y":0,"width":760,"height":7000},
+		{"id":"2966e81f7e21f271","type":"file","file":"docs/diagrams/01-vortex-cascade-topology.md","x":-6600,"y":0,"width":1040,"height":1480},
+		{"id":"14cc8bb2c8a01c83","type":"file","file":"docs/diagrams/04-fibonacci-weighting.md","x":-6260,"y":1720,"width":700,"height":1139},
+		{"id":"75e856132f39c0a4","type":"file","file":"docs/diagrams/02-sydney-tunnel-route.md","x":-7160,"y":5520,"width":1600,"height":1480},
+		{"id":"81d8ee2190538dc8","type":"file","file":"docs/diagrams/03-wave-atom-sphinx-flow.md","x":-7000,"y":3160,"width":1480,"height":2000},
+		{"id":"3314df150a49a9d6","type":"file","file":"docs/diagrams/05-multi-ai-orchestration.md","x":-8200,"y":3080,"width":840,"height":1600},
+		{"id":"2d15d7ef3315e250","type":"file","file":"docs/diagrams/06-sphinx-five-gates.md","x":-8203,"y":4920,"width":643,"height":3880},
+		{"id":"fb7580e658319642","x":-10880,"y":3080,"width":760,"height":4200,"type":"file","file":"docs/instructions.md"}
+	],
+	"edges":[]
+}

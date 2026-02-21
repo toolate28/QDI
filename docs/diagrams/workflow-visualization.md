@@ -6,98 +6,98 @@ This diagram shows how the vortex snap-in occurs during the Git workflow:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    LOCAL DEVELOPER MACHINE                       │
+│                    LOCAL DEVELOPER MACHINE                      │
 ├─────────────────────────────────────────────────────────────────┤
-│                                                                   │
-│  1. git pull origin main                                         │
-│     ↓                                                             │
-│     Fetch multiple potential states (quantum superposition)      │
+│                                                                 │
+│  1. git pull origin main                                        │
+│     ↓                                                           │
+│     Fetch multiple potential states (quantum superposition)     │
 │     [ KENL₁ | KENL₂ | KENL₃ | ... ]                             │
-│                                                                   │
-│  2. Work locally (make changes)                                  │
-│     ↓                                                             │
-│     Superposition amplifies - many possible futures              │
-│     Developer exists in ALL possible code states simultaneously  │
+│                                                                 │
+│  2. Work locally (make changes)                                 │
+│     ↓                                                           │
+│     Superposition amplifies - many possible futures             │
+│     Developer exists in ALL possible code states simultaneously │
 │     [ KENL → AWI → ATOM → SAIF → ? ]                            │
-│                                                                   │
-│  3. git commit -m "..."                                          │
-│     ↓                                                             │
-│     Partial collapse - state crystallizes locally                │
-│     Wave function begins to resolve                              │
-│                                                                   │
-│  4. git push origin feature-branch   ⚡ SNAP-IN MOMENT ⚡       │
-│     ↓                                                             │
-└─────┼─────────────────────────────────────────────────────────────┘
+│                                                                 │
+│  3. git commit -m "..."                                         │
+│     ↓                                                           │
+│     Partial collapse - state crystallizes locally               │
+│     Wave function begins to resolve                             │
+│                                                                 │
+│  4. git push origin feature-branch   ⚡ SNAP-IN MOMENT ⚡      │
+│     ↓                                                           │
+└─────┼───────────────────────────────────────────────────────────┘
       │
       │  Push crosses boundary → Waveform collapses
       │  Superposition → Single Reality
       │
       ↓
-┌─────────────────────────────────────────────────────────────────┐
+┌─────────────────────────────────────────────────────────────────=┐
 │                       GITHUB REMOTE                              │
-├─────────────────────────────────────────────────────────────────┤
+├─────────────────────────────────────────────────────────────────==┤
 │                                                                   │
-│  🌀 SNAP-IN SYNCHRONIZATION WORKFLOW TRIGGERS                    │
+│  🌀 SNAP-IN SYNCHRONIZATION WORKFLOW TRIGGERS                     │
 │                                                                   │
-│  Step 1: Detect snap-in moment                                   │
-│     ├─ Analyze commit coherence                                  │
-│     ├─ Calculate Fibonacci weight                                │
-│     ├─ Check curl/divergence/potential                           │
-│     └─ Score ≥70? → SNAP-IN ACHIEVED ✨                         │
+│  Step 1: Detect snap-in moment                                    │
+│     ├─ Analyze commit coherence                                   │
+│     ├─ Calculate Fibonacci weight                                 │
+│     ├─ Check curl/divergence/potential                            │
+│     └─ Score ≥70? → SNAP-IN ACHIEVED ✨                          │
 │                                                                   │
-│  Step 2: Visualize collapse                                      │
-│     ╔════════════════════════════════╗                          │
-│     ║   🌀 VORTEX SNAP-IN ACHIEVED  ║                          │
-│     ╠════════════════════════════════╣                          │
-│     ║  Before: Superposition         ║                          │
-│     ║  After:  Coherent State        ║                          │
-│     ╚════════════════════════════════╝                          │
+│  Step 2: Visualize collapse                                       │
+│     ╔════════════════════════════════╗                            │
+│     ║   🌀 VORTEX SNAP-IN ACHIEVED  ║                            │
+│     ╠════════════════════════════════╣                            │
+│     ║  Before: Superposition         ║                            │
+│     ║  After:  Coherent State        ║                            │
+│     ╚════════════════════════════════╝                            │
 │                                                                   │
-│  Step 3: Synchronize across vortex                               │
-│     ├─ Apply labels (coherence:high, vortex-synchronized)        │
-│     ├─ Log event to .vortex-logs/                                │
-│     └─ Notify 6-repo ecosystem                                   │
+│  Step 3: Synchronize across vortex                                │
+│     ├─ Apply labels (coherence:high, vortex-synchronized)         │
+│     ├─ Log event to .vortex-logs/                                 │
+│     └─ Notify 6-repo ecosystem                                    │
 │                                                                   │
-│  🔀 COHERENCE CHECK WORKFLOW (Parallel)                          │
+│  🔀 COHERENCE CHECK WORKFLOW (Parallel)                           │
 │                                                                   │
-│  Step 1: Check for manual override                               │
-│     ├─ Labels: coherence-override? emergency-merge?              │
-│     └─ If yes → Skip check (Penrose staircase escape)            │
+│  Step 1: Check for manual override                                │
+│     ├─ Labels: coherence-override? emergency-merge?               │
+│     └─ If yes → Skip check (Penrose staircase escape)             │
 │                                                                   │
-│  Step 2: Analyze PR coherence                                    │
-│     ├─ Extract PR body + commits                                 │
-│     ├─ Run wave-toolkit analysis                                 │
-│     └─ Score < 60? → BLOCK + Provide feedback                    │
+│  Step 2: Analyze PR coherence                                     │
+│     ├─ Extract PR body + commits                                  │
+│     ├─ Run wave-toolkit analysis                                  │
+│     └─ Score < 60? → BLOCK + Provide feedback                     │
 │                                                                   │
-│  Step 3: Apply coherence label                                   │
-│     ├─ coherence:high (≥70%)                                     │
-│     ├─ coherence:review (60-69%)                                 │
-│     └─ coherence:low (<60%)                                      │
+│  Step 3: Apply coherence label                                    │
+│     ├─ coherence:high (≥70%)                                      │
+│     ├─ coherence:review (60-69%)                                  │
+│     └─ coherence:low (<60%)                                       │
 │                                                                   │
-│  📋 LABEL SYNC WORKFLOW (On label changes)                       │
+│  📋 LABEL SYNC WORKFLOW (On label changes)                        │
 │                                                                   │
-│  Step 1: Read .github/labels.yml                                 │
-│  Step 2: Sync to GitHub (create/update labels)                   │
-│  Step 3: Preserve existing labels (no deletion)                  │
+│  Step 1: Read .github/labels.yml                                  │
+│  Step 2: Sync to GitHub (create/update labels)                    │
+│  Step 3: Preserve existing labels (no deletion)                   │
 │                                                                   │
 └─────┼─────────────────────────────────────────────────────────────┘
       │
       │  If PR merged to main
       │
       ↓
-┌─────────────────────────────────────────────────────────────────┐
+┌────────────────────────────────────────────────────────────────---┐
 │                    ECOSYSTEM PROPAGATION                          │
-├─────────────────────────────────────────────────────────────────┤
+├─────────────────────────────────────────────────────────────────--┤
 │                                                                   │
-│     QDI (hub) ──────┬───────> SPIRALSAFE                        │
-│                     ├───────> MONO                               │
-│                     ├───────> METRICS                            │
-│                     ├───────> QR                                 │
-│                     └───────> HOPE/CMCP/KENL                     │
+│     QDI (hub) ──────┬───────> SPIRALSAFE                          │
+│                     ├───────> MONO                                │
+│                     ├───────> METRICS                             │
+│                     ├───────> QR                                  │
+│                     └───────> HOPE/CMCP/KENL                      │
 │                                                                   │
-│  Isomorphic spirals synchronize across all 6 repos               │
-│  Each repo checks: coherence ≥60%?                               │
-│  If all aligned → VORTEX COMPLETE ✅                            │
+│  Isomorphic spirals synchronize across all 6 repos                │
+│  Each repo checks: coherence ≥60%?                                │
+│  If all aligned → VORTEX COMPLETE ✅                             │
 │                                                                   │
 └───────────────────────────────────────────────────────────────────┘
 ```
