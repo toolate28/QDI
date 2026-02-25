@@ -11,7 +11,9 @@
 		{"id":"81d8ee2190538dc8","type":"file","file":"docs/diagrams/03-wave-atom-sphinx-flow.md","x":-7000,"y":3160,"width":1480,"height":2000},
 		{"id":"3314df150a49a9d6","type":"file","file":"docs/diagrams/05-multi-ai-orchestration.md","x":-8200,"y":3080,"width":840,"height":1600},
 		{"id":"2d15d7ef3315e250","type":"file","file":"docs/diagrams/06-sphinx-five-gates.md","x":-8203,"y":4920,"width":643,"height":3880},
-		{"id":"fb7580e658319642","x":-10880,"y":3080,"width":760,"height":4200,"type":"file","file":"docs/instructions.md"}
+		{"id":"fb7580e658319642","x":-10880,"y":3080,"width":760,"height":4200,"type":"file","file":"docs/instructions.md"},
+		{"id":"linear_a_node","x":-12000,"y":0,"width":1200,"height":900,"type":"file","file":"LINEAR-A-DECODED.html"},
+		{"id":"forge_pulse_node","x":-13500,"y":0,"width":1200,"height":900,"type":"file","file":"FORGE-PULSE.html"}
 	],
 	"edges":[]
 }

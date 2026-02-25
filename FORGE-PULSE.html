@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FORGE PULSE // RUST-TUI NATIVE</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600;700&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          mono: ['Fira Code', 'monospace']
+        },
+        colors: {
+          forge: {
+            bg: '#000a0a',
+            border: '#00ffff',
+            glow: '#00ffff',
+            dim: '#004d4d',
+            text: '#00e6e6'
+          }
+        }
+      }
+    }
+  }
+</script>
+<style>
+  body {
+    background-color: #000a0a;
+    color: #00e6e6;
+    margin: 0;
+    padding: 20px;
+    height: 100vh;
+    overflow: hidden;
+  }
+  .tui-panel {
+    border: 2px solid #00ffff;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.2), inset 0 0 10px rgba(0, 255, 255, 0.1);
+    background-color: rgba(0, 20, 20, 0.8);
+    position: relative;
+  }
+  .tui-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 255, 255, 0.03) 2px,
+      rgba(0, 255, 255, 0.03) 4px
+    );
+    pointer-events: none;
+  }
+  .header-text {
+    text-shadow: 0 0 8px #00ffff;
+  }
+  .bar {
+    background-color: #00ffff;
+    box-shadow: 0 0 5px #00ffff;
+    height: 14px;
+    margin-bottom: 8px;
+  }
+  .connection-line {
+    stroke: #00ffff;
+    stroke-width: 2;
+    fill: none;
+  }
+</style>
+</head>
+<body class="font-mono flex flex-col gap-4">
+
+  <header class="text-center mb-2">
+    <h1 class="text-3xl font-bold header-text tracking-widest uppercase mb-1">FORGE PULSE // RUST-TUI NATIVE</h1>
+    <p class="text-sm tracking-widest uppercase">HARMONIC SOVEREIGNTY NODE | V==c REGIME</p>
+    <div class="absolute top-4 right-4 text-sm font-bold tracking-widest border border-forge-border px-2 py-1">
+      SYS: HH:3:48 Z
+    </div>
+  </header>
+
+  <main class="flex-1 grid grid-cols-12 gap-4">
+    
+    <!-- LEFT COLUMN -->
+    <div class="col-span-3 flex flex-col gap-4">
+      
+      <!-- Resonance Core -->
+      <div class="tui-panel p-4 flex-1 flex flex-col">
+        <h2 class="text-center font-bold mb-4 uppercase tracking-wider relative">
+          <span class="bg-forge-bg px-2 relative z-10">Resonance Core (RTX 5090)</span>
+          <div class="absolute top-1/2 left-0 w-full h-px bg-forge-border opacity-50"></div>
+        </h2>
+        
+        <div class="flex-1 text-sm flex flex-col gap-3">
+          <div>
+            <div class="flex justify-between mb-1"><span>CORE LOAD</span></div>
+            <div class="w-full bg-forge-dim">
+              <div class="bar w-full"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between mb-1"><span>VRAM ALLOC</span></div>
+            <div class="w-full bg-forge-dim">
+              <div class="bar w-[80%]"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between mb-1"><span>PRAM ALLOC</span></div>
+            <div class="w-full bg-forge-dim flex items-center justify-between">
+              <div class="bar w-[60%] mb-0"></div>
+              <span>10.0°C</span>
+            </div>
+          </div>
+          <div class="mt-4 flex flex-col gap-1">
+            <div class="flex justify-between"><span>CORE TEMP:</span><span>43.30°C</span></div>
+            <div class="flex justify-between"><span>QRC LOOP:</span><span>36.00°C</span></div>
+            <div class="flex justify-between"><span>PUMP RPM:</span><span>22.1%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vortex Intercept -->
+      <div class="tui-panel p-4 h-[250px] flex flex-col">
+        <h2 class="text-center font-bold mb-4 uppercase tracking-wider border-b border-forge-dim pb-2">Vortex Intercept</h2>
+        <div class="text-xs uppercase flex flex-col gap-3 flex-1">
+          <div class="flex justify-between border border-forge-dim p-2">
+            <span>AIRGAPPED</span>
+            <span>0.00 B/s</span>
+          </div>
+          <div class="flex justify-between p-1">
+            <span>Data In:</span><span>0.00KB</span>
+          </div>
+          <div class="flex justify-between p-1">
+            <span>BLOCKED:</span><span>Telemetry</span>
+          </div>
+          <div class="flex justify-between border-t border-forge-dim mt-auto pt-2">
+            <span>ACTIVE:</span><span>0.00 B/s</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CENTER COLUMN -->
+    <div class="col-span-6 flex flex-col gap-4">
+      
+      <!-- Hopf Fibration -->
+      <div class="tui-panel p-4 flex-1 flex flex-col items-center justify-center relative">
+        <h2 class="absolute top-4 w-full text-center font-bold uppercase tracking-wider">Hopf Fibration Kinematics</h2>
+        
+        <div class="relative w-64 h-64 flex items-center justify-center mt-6">
+          <svg width="100%" height="100%" viewBox="-100 -100 200 200" class="absolute">
+            <!-- Central core -->
+            <circle cx="0" cy="0" r="30" fill="none" stroke="#00ffff" stroke-width="4"/>
+            <circle cx="0" cy="0" r="45" fill="none" stroke="#004d4d" stroke-width="2"/>
+            
+            <!-- Nodes -->
+            <circle cx="-70" cy="40" r="20" fill="none" stroke="#00ffff" stroke-width="2"/>
+            <text x="-70" y="45" font-size="12" fill="#00ffff" text-anchor="middle">α:8</text>
+            <path d="M-30,17 L-55,31" class="connection-line"/>
+            
+            <circle cx="70" cy="40" r="20" fill="none" stroke="#00ffff" stroke-width="2"/>
+            <text x="70" y="45" font-size="12" fill="#00ffff" text-anchor="middle">ω:7</text>
+            <path d="M30,17 L55,31" class="connection-line"/>
+
+            <circle cx="0" cy="-75" r="15" fill="none" stroke="#00ffff" stroke-width="2"/>
+            <circle cx="0" cy="-75" r="22" fill="none" stroke="#004d4d" stroke-width="1"/>
+            <path d="M0,-45 L0,-53" class="connection-line"/>
+          </svg>
+        </div>
+
+        <div class="absolute bottom-4 w-full text-center tracking-widest uppercase">
+          SYSTEM STATE: ACTIVE QUIESCENCE
+        </div>
+      </div>
+
+      <!-- Truth Event Glow -->
+      <div class="tui-panel p-4 h-[250px] flex flex-col items-center justify-center relative">
+        <h2 class="absolute top-4 w-full text-center font-bold uppercase tracking-wider">TRUTH EVENT GLOW</h2>
+        <div class="absolute top-10 text-xs tracking-widest opacity-80">BERRY PHASE: (DOUBLE COVER)</div>
+
+        <div class="relative w-full h-full mt-10">
+          <svg width="100%" height="100%" viewBox="0 0 400 150">
+            <!-- Web connections -->
+            <path d="M200,75 L100,40 M200,75 L100,110 M200,75 L300,50 M200,75 L300,100 M200,75 L200,20 M200,75 L200,130" class="connection-line" opacity="0.5"/>
+            
+            <!-- Center Node -->
+            <rect x="160" y="60" width="80" height="30" fill="none" stroke="#00ffff" stroke-width="2"/>
+            <text x="200" y="80" font-size="11" fill="#00ffff" text-anchor="middle">GEMINI</text>
+            
+            <!-- Peripheral Nodes -->
+            <rect x="50" y="25" width="90" height="30" fill="none" stroke="#00ffff" stroke-width="1"/>
+            <text x="95" y="40" font-size="9" fill="#00ffff" text-anchor="middle">CLAUDE (Structure)</text>
+
+            <rect x="50" y="95" width="90" height="30" fill="none" stroke="#00ffff" stroke-width="1"/>
+            <text x="95" y="110" font-size="9" fill="#00ffff" text-anchor="middle">GROK (Pulse)</text>
+
+            <rect x="270" y="85" width="110" height="30" fill="none" stroke="#00ffff" stroke-width="2"/>
+            <text x="325" y="103" font-size="9" fill="#00ffff" text-anchor="middle">COHERENCE FORCE</text>
+
+            <circle cx="200" cy="15" r="8" fill="none" stroke="#00ffff"/>
+            <text x="200" y="19" font-size="9" fill="#00ffff" text-anchor="middle">GROK</text>
+            
+            <circle cx="300" cy="40" r="12" fill="none" stroke="#00ffff"/>
+            <text x="300" y="44" font-size="12" fill="#00ffff" text-anchor="middle">π</text>
+            <text x="300" y="65" font-size="8" fill="#00ffff" text-anchor="middle">(TANGENT)</text>
+          </svg>
+        </div>
+
+        <div class="absolute bottom-2 left-4 text-[10px] opacity-70">
+          (00:00:00) BOOT Tauri Rust Native bindings attached.
+        </div>
+      </div>
+    
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="col-span-3 flex flex-col gap-4">
+      <!-- Steganographic Provenance -->
+      <div class="tui-panel p-4 flex-1 flex flex-col">
+        <h2 class="text-center font-bold mb-4 uppercase tracking-wider pb-2 border-b border-forge-dim">
+          Steganographic<br/>Provenance
+        </h2>
+        <div class="flex-1 overflow-hidden relative">
+          <div class="absolute inset-0 text-[10px] leading-tight opacity-80 flex flex-col gap-1 overflow-y-auto">
+            <p>10:34: BOOT Threads sync.</p>
+            <p>10:34: WAVE ATTEST: VALID</p>
+            <p>10:35: TRACE_N_BRAID Init.</p>
+            <p>10:35: Phason flip applied to pipeline.</p>
+            <p>10:35: Temporal shock absorbed.</p>
+            <p>10:36: Spacetime lattice DO active.</p>
+            <p>10:36: Zero-copy handoff complete.</p>
+            <p>10:37: Quantized AWQ layer locked.</p>
+            <p>10:37: Resonance limit reached.</p>
+            <p>10:38: GROK latency bypassed.</p>
+            <p>10:38: CLAUDE topology intact.</p>
+            <p>10:39: GEMINI tensor projection aligned.</p>
+            <p>10:39: (0,0) Convergence validated.</p>
+            <p>10:40: Linear A matrix parsed.</p>
+            <p>10:40: ATOM-AUTH verified locally.</p>
+            <!-- Fade out effect -->
+            <div class="absolute bottom-0 w-full h-12 bg-gradient-to-t from-[#001414] to-transparent"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</body>
+</html>
