@@ -1,3 +1,4 @@
+<!-- v0.3.0 | ATOM: CLEANUP-2026-03-19 | a+w=15 -->
 # Contributing to SpiralSafe
 
 We welcome contributions to SpiralSafe! This document provides guidelines for contributing to the project.
